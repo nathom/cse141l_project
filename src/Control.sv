@@ -64,6 +64,11 @@ module Control #(
       'b101: begin
 
       end
+
+      'b010: begin //NAND
+        ALUOp = 'b00;
+        ALUSrc = 'b00;
+      end
     endcase
 
   end
