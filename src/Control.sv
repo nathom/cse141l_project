@@ -43,9 +43,15 @@ module Control #(
       end
       'b001: ALUOp = 'b000;  // add:  y = a+b
 
-      'b010: begin  // load
+      'b011: begin  // load
         MemtoReg = 'b1;  // 
       end
+
+      'b010: begin //NAND
+        ALUOp = 'b00;
+        ALUSrc = 'b00;
+      end
+
       // ...
     endcase
 
