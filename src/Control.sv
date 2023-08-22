@@ -36,6 +36,16 @@ module Control #(
       * 110: BNE
       * 111: SET
       */
+      'b000: begin // add
+        MemWrite = 'b1; // write to data mem
+      
+      end 
+      
+      'b001: begin // right rotate
+        MemWrite = 'b1
+
+      end
+
       'b000: begin  // store operation
         MemWrite = 'b1;  // write to data mem
         RegWrite = 'b0;  // typically don't also load reg_file
