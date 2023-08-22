@@ -9,7 +9,10 @@ module top_level (
   A = 3;  // ALU command bit width
   wire [D-1:0] target,  // jump 
   prog_ctr;
-  wire RegWrite;
+
+  wire RegDst, Branch, MemtoReg, MemWrite, ALUSrc, RegWrite;
+  wire [2:0] ALUOp;
+
   wire [7:0] datA, datB,  // from RegFile
   muxB, rslt,  // alu output
   immed;
@@ -18,10 +21,11 @@ module top_level (
       pariQ,  // registered parity flag from ALU
       zeroQ;  // registered zero flag from ALU 
   wire relj;  // from control to PC; relative jump enable
-  wire pari, zero, sc_clr, sc_en, MemWrite, ALUSrc;  // immediate switch
+  wire pari, zero, sc_clr, sc_en, ALUSrc;  // immediate switch
   wire [A-1:0] alu_cmd;
   wire [  8:0] mach_code;  // machine code
   wire [2:0] rd_addrA, rd_adrB;  // address pointers to reg_file
+
   // fetch subassembly
   PC #(
       .D(D)
@@ -51,14 +55,14 @@ module top_level (
 
   // control decoder
   Control ctl1 (
-      .instr(),
-      .RegDst  (),
-      .Branch  (relj)  ,
-      .MemWrite ,
-      .ALUSrc   ,
-      .RegWrite   ,
-      .MemtoReg(),
-      .ALUOp()
+      .instr (mach_code),
+      .RegDst,
+      .Branch(relj),
+      .MemWrite,
+      .ALUSrc,
+      .RegWrite,
+      .MemtoReg,
+      .ALUOp
   );
 
   assign rd_addrA = mach_code[2:0];

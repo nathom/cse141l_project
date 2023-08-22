@@ -36,7 +36,6 @@ module Control #(
       * 110: BNE
       * 111: SET
       */
-      'b001: ALUOp = 'b000;  // add:  y = a+b
 
       'b010: begin  // load
         MemtoReg = 'b1;  // 
@@ -49,11 +48,13 @@ module Control #(
         MemWrite = 'b1;
         RegWrite = 'b0;
       end
+
       // Moves value from r0 to r1
       // move r1, r0
       'b101: begin
-
+        RegWrite = 'b1;
       end
+
     endcase
 
   end
