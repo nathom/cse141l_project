@@ -37,7 +37,7 @@ module Control #(
       * 111: SET
       */
       'b000: begin // add
-        ALUOp = 'b000; // write to data mem
+        ALUOp = 'b000; // y = a+b
       
       end 
       
