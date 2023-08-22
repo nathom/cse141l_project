@@ -37,16 +37,17 @@ module Control #(
       * 111: SET
       */
       'b000: begin // add
-        MemWrite = 'b1; // write to data mem
+        ALUOp = 'b000; // y = a+b
       
       end 
       
       'b001: begin // right rotate
-        MemWrite = 'b1
+        ALUOp = 'b111;
+        ALUSrc = 'b0;
 
       end
 
-      'b001: ALUOp = 'b000;  // add:  y = a+b
+      //'b001: ALUOp = 'b000;  // add:  y = a+b
 
       'b011: begin  // load
         MemtoReg = 'b1;  // 
