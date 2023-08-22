@@ -36,23 +36,24 @@ module Control #(
       * 110: BNE
       * 111: SET
       */
-      'b000: begin  // store operation
-        MemWrite = 'b1;  // write to data mem
-        RegWrite = 'b0;  // typically don't also load reg_file
-
-      end
       'b001: ALUOp = 'b000;  // add:  y = a+b
 
       'b011: begin  // load
         MemtoReg = 'b1;  // 
       end
 
-      'b010: begin //NAND
-        ALUOp = 'b00;
-        ALUSrc = 'b00;
+      // Stores value 123 into address contained in r0
+      // STR r0, 123
+      'b100: begin
+        // ALUOp = 'b111;
+        MemWrite = 'b1;
+        RegWrite = 'b0;
       end
+      // Moves value from r0 to r1
+      // move r1, r0
+      'b101: begin
 
-      // ...
+      end
     endcase
 
   end
