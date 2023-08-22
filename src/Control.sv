@@ -28,8 +28,8 @@ module Control #(
         MemWrite = 'b1;  // write to data mem
         RegWrite = 'b0;  // typically don't also load reg_file
       end
-      'b00001: ALUOp = 'b000;  // add:  y = a+b
-      'b00010: begin  // load
+      'b0001: ALUOp = 'b000;  // add:  y = a+b
+      'b0010: begin  // load
         MemtoReg = 'b1;  // 
       end
       // ...
