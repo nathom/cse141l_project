@@ -42,7 +42,8 @@ module Control #(
       end 
       
       'b001: begin // right rotate
-        MemWrite = 'b1
+        ALUOp = 'b1;
+        ALUSrc = 'b0;
 
       end
 
