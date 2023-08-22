@@ -42,7 +42,7 @@ module Control #(
       end 
       
       'b001: begin // right rotate
-        ALUOp = 'b1;
+        ALUOp = 'b111;
         ALUSrc = 'b0;
 
       end
