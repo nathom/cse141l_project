@@ -10,6 +10,7 @@ module Control #(
     MemWrite,
     ALUSrc,
     RegWrite,
+    MoveCtrl,
     output logic [opwidth-1:0] ALUOp
 );  // for up to 8 ALU operations
 
@@ -22,9 +23,11 @@ module Control #(
     RegWrite = 'b1;  // 0: for store or no op  1: most other operations 
     MemtoReg = 'b0;  // 1: load -- route memory instead of ALU to reg_file data in
     ALUOp    = 'b111;  // y = a+0;
+    MoveCtrl = 'b0;
     // sample values only -- use what you need
     case (instr)  // override defaults with exceptions
       /* All instructions:
+      *
       * R type:
       * 000: add
       * 001: right rotate
@@ -44,9 +47,11 @@ module Control #(
         ALUOp = 'b01;
       end
 
-      'b010: begin  // nand
+      'b010: begin  // NAND
         ALUOp = 'b10;
       end
+
+
 
       'b011: begin  // load
         MemtoReg = 'b1;  // 
@@ -64,6 +69,7 @@ module Control #(
       // move r1, r0
       'b101: begin
         RegWrite = 'b1;
+        MoveCtrl = 'b1;
       end
     endcase
 
