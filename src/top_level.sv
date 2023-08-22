@@ -10,7 +10,7 @@ module top_level (
   wire [D-1:0] target,  // jump 
   prog_ctr;
 
-  wire RegDst, Branch, MemtoReg, MemWrite, ALUSrc, RegWrite;
+  wire RegDst, Branch, MemtoReg, MemWrite, ALUSrc, RegWrite, MoveCtrl;
   wire [2:0] ALUOp;
 
   wire [7:0] datA, datB,  // from RegFile
@@ -58,10 +58,11 @@ module top_level (
       .instr (mach_code),
       .RegDst,
       .Branch(relj),
+      .MemtoReg,
       .MemWrite,
       .ALUSrc,
       .RegWrite,
-      .MemtoReg,
+      .MoveCtrl,
       .ALUOp
   );
 

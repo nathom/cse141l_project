@@ -3,7 +3,7 @@ module mux2 #(
 ) (
     input logic [width-1:0] a,
     input logic [width-1:0] b,
-    input wire sel,
+    input logic sel,
     output logic [width-1:0] y
 );
 
