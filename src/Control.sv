@@ -36,8 +36,19 @@ module Control #(
       * 110: BNE
       * 111: SET
       */
+      'b000: begin  // add
+        ALUOp = 'b00;  // y = a+b
+      end
 
-      'b010: begin  // load
+      'b001: begin  // right rotate
+        ALUOp = 'b01;
+      end
+
+      'b010: begin  // nand
+        ALUOp = 'b10;
+      end
+
+      'b011: begin  // load
         MemtoReg = 'b1;  // 
       end
 
@@ -54,7 +65,6 @@ module Control #(
       'b101: begin
         RegWrite = 'b1;
       end
-
     endcase
 
   end
