@@ -46,17 +46,24 @@ module Control #(
 
       end
 
-      'b000: begin  // store operation
-        MemWrite = 'b1;  // write to data mem
-        RegWrite = 'b0;  // typically don't also load reg_file
-
-      end
       'b001: ALUOp = 'b000;  // add:  y = a+b
 
       'b010: begin  // load
         MemtoReg = 'b1;  // 
       end
-      // ...
+
+      // Stores value 123 into address contained in r0
+      // STR r0, 123
+      'b100: begin
+        // ALUOp = 'b111;
+        MemWrite = 'b1;
+        RegWrite = 'b0;
+      end
+      // Moves value from r0 to r1
+      // move r1, r0
+      'b101: begin
+
+      end
     endcase
 
   end
