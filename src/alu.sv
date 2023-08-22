@@ -25,6 +25,8 @@ module alu (
       rslt = (inA >> inB) | (inA << (6 - inB));
       2'b10:  // NAND
       rslt = ~(inA & inB);
+      2'b11:  // nop
+      rslt = inA;
     endcase
   end
 
