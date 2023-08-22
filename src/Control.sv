@@ -1,7 +1,7 @@
 // control decoder
 module Control #(
-    parameter opwidth = 3,
-    mcodebits = 4
+    parameter opwidth = 2,
+    mcodebits = 3
 ) (
     input [mcodebits-1:0] instr,  // subset of machine code (any width you need)
     output logic RegDst,
@@ -24,12 +24,26 @@ module Control #(
     ALUOp    = 'b111;  // y = a+0;
     // sample values only -- use what you need
     case (instr)  // override defaults with exceptions
-      'b0000: begin  // store operation
+      /* All instructions:
+      * R type:
+      * 000: add
+      * 001: right rotate
+      * 010: NAND
+      * 011: load
+      * 100: store
+      * 101: move
+      * J type:
+      * 110: BNE
+      * 111: SET
+      */
+      'b000: begin  // store operation
         MemWrite = 'b1;  // write to data mem
         RegWrite = 'b0;  // typically don't also load reg_file
+
       end
-      'b0001: ALUOp = 'b000;  // add:  y = a+b
-      'b0010: begin  // load
+      'b001: ALUOp = 'b000;  // add:  y = a+b
+
+      'b010: begin  // load
         MemtoReg = 'b1;  // 
       end
       // ...
