@@ -36,6 +36,16 @@ module Control #(
       * 110: BNE
       * 111: SET
       */
+      'b000: begin // add
+        MemWrite = 'b1; // write to data mem
+      
+      end 
+      
+      'b001: begin // right rotate
+        MemWrite = 'b1
+
+      end
+
       'b001: ALUOp = 'b000;  // add:  y = a+b
 
       'b011: begin  // load
