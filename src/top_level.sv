@@ -62,7 +62,7 @@ module top_level (
       .ALUSrc,
       .RegWrite,
       .MemtoReg,
-      .ALUOp
+      .ALUOp,
   );
 
   assign rd_addrA = mach_code[2:0];
@@ -100,6 +100,15 @@ module top_level (
       .wr_en  (MemWrite),  // stores
       .addr   (datA),
       .dat_out()
+  );
+
+  mux2 moveMux (
+    .a(//Pass through), 
+    .b(//Operand),
+    .sel(MoveCtrl),
+    .y()
+
+//reg address is 3 bits
   );
 
   // registered flags from ALU
