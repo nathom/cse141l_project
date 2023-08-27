@@ -7,6 +7,8 @@ module reg_file #(
     input               clk,
     input               wr_en,    // write enable
     input        [pw:0] wr_addr,  // write address pointer
+    input               moveCtrl,
+    input               moveSrc,
     rd_addrA,  // read address pointers
     rd_addrB,
     output logic [ 7:0] datA_out, // read data
@@ -21,8 +23,15 @@ module reg_file #(
 
   // writes are sequential (clocked)
   always_ff @(posedge clk)
-    if (wr_en)  // anything but stores or no ops
+    if (wr_en)  begin// anything but stores or no ops
       core[wr_addr] <= dat_in;
+    end
+    
+    //I'm pretty sure this only supports reg file operations? i'm not sure
+    if (moveCtrl) begin
+      core[wr_addr] <= core[moveSrc]; // Copy data from source to destination
+    end
+
 
 endmodule
 /*

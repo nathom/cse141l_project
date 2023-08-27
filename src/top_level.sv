@@ -63,8 +63,10 @@ module top_level (
       .RegWrite,
       .MemtoReg,
       .ALUOp,
+      .MoveCtrl
   );
 
+//Double check if these are right
   assign rd_addrA = mach_code[2:0];
   assign rd_addrB = mach_code[5:3];
   assign alu_cmd  = mach_code[8:6];
@@ -79,7 +81,9 @@ module top_level (
       .rd_addrB(rd_addrB),
       .wr_addr (rd_addrB),     // in place operation
       .datA_out(datA),
-      .datB_out(datB)
+      .datB_out(datB),
+      .moveCtrl(MoveCtrl),
+      .moveSrc(moveSrc)
   );
 
   assign muxB = ALUSrc ? immed : datB;
@@ -102,16 +106,8 @@ module top_level (
       .dat_out()
   );
 
-  mux2 moveMux (
-    .a(//Pass through), 
-    .b(//Operand),
-    .sel(MoveCtrl),
-    .y()
 
-//reg address is 3 bits
-  );
 
-  // registered flags from ALU
   always_ff @(posedge clk) begin
     pariQ <= pari;
     zeroQ <= zero;
