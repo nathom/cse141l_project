@@ -1,4 +1,5 @@
 import re
+import sys
 
 r_ops = {
     "add": "000",
@@ -20,8 +21,7 @@ registers = {
     "r6": "110",
     "out": "111",
 }
-test_line = "add r1, r0"
-test_line2 = "set 1123"
+
 r_re = re.compile(r"\s*(\w+)\s+(\w+),?\s+(\w+)\s*")
 i_re = re.compile(r"\s*(\w+)\s+(\d+)\s*")
 
@@ -30,19 +30,16 @@ def decode(line: str) -> str:
     r_match = r_re.match(line)
     i_match = i_re.match(line)
 
-    if r_match is not None and i_match is not None:
-        raise Exception(f"Ambiguous instruction found for {line=}")
-    elif r_match is None and i_match is None:
-        raise Exception(f"No instruction found for {line=}")
-
     if r_match is not None:
-        return decode_r(r_match, line)
-    if i_match is not None:
-        return decode_i(i_match, line)
+        return decode_r(r_match)
+    elif i_match is not None:
+        return decode_i(i_match)
+    else:
+        raise Exception(f"No instruction found for {line = }")
 
 
 def decode_r(match: re.Match) -> str:
-    op, reg1, reg0 = match.groups()
+    op, reg1, reg0 = map(str.lower, match.groups())
     op_bin = r_ops.get(op)
     if op_bin is None:
         raise Exception(f'invalid op "{op}"')
@@ -55,7 +52,7 @@ def decode_r(match: re.Match) -> str:
     if reg0_bin is None:
         raise Exception(f'invalid reg "{reg0}"')
 
-    return f"{op_bin}{reg1_bin}{reg0_bin}"
+    return f"{op_bin}{reg1_bin}{reg0_bin}\n"
 
 
 def decode_i(match: re.Match) -> str:
@@ -69,4 +66,24 @@ def decode_i(match: re.Match) -> str:
     op_bin = i_ops.get(op)
     if op_bin is None:
         raise Exception(f'invalid op "{op}"')
-    return f"{op_bin}{bin}"
+    return f"{op_bin}{bin}\n"
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(f"Usage: python {sys.argv[0]} INPUT_ASM [OUTPUT_BINARY]")
+        return
+
+    if len(sys.argv) == 2:
+        outfile = sys.stdout
+    else:
+        outfile = open(sys.argv[2], "w")
+
+    with open(sys.argv[1]) as asm:
+        for line in asm:
+            bin = decode(line)
+            outfile.write(bin)
+
+
+if __name__ == "__main__":
+    main()

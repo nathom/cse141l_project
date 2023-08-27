@@ -22,7 +22,7 @@ module Control #(
     ALUSrc   = 'b0;  // 1: immediate  0: second reg file output
     RegWrite = 'b1;  // 0: for store or no op  1: most other operations 
     MemtoReg = 'b0;  // 1: load -- route memory instead of ALU to reg_file data in
-    ALUOp    = 'b111;  // y = a+0;
+    ALUOp    = 2'b11;  // y = a+0;
     MoveCtrl = 'b0; // 1: if mov, 0: otherwise
     // sample values only -- use what you need
     case (instr)  // override defaults with exceptions
@@ -64,15 +64,21 @@ module Control #(
       end
 
       // Moves value from r0 to r1
-      // move r1, r0
+      // mov r1, r0
       'b101: begin
         MoveCtrl = 'b1;
       end
 
-      // BEQ r0, r1
+      // beq r0, r1
       // branches to OUT if r0 == r1
-      'b111: begin
+      'b110: begin
         Branch = 'b1;
+      end
+
+      // set imm
+      // sets OUT register to imm
+      'b111: begin
+        ALUSrc = 'b1;
       end
     endcase
 

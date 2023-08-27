@@ -2,10 +2,10 @@
 // sample -- change as desired
 module alu (
     input        [1:0] alu_cmd,  // ALU instructions
-    input        [7:0] inA,
+    input        [5:0] inA,
     inB,  // 8-bit wide data path
     input              sc_i,     // shift_carry in
-    output logic [7:0] rslt,
+    output logic [5:0] rslt,
     output logic       sc_o,     // shift_carry out
     pari,  // reduction XOR (output)
     zero,  // NOR (output)
@@ -25,8 +25,8 @@ module alu (
       rslt = (inA >> inB) | (inA << (6 - inB));
       2'b10:  // NAND
       rslt = ~(inA & inB);
-      2'b11:  // nop, pass B through
-      rslt = inB;
+      2'b11:  // nop
+      rslt = inA;
     endcase
   end
 
