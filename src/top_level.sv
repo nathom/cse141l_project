@@ -6,7 +6,7 @@ module top_level (
     output logic done
 );
   parameter D = 12,  // program counter width
-  A = 3;  // ALU command bit width
+  A = 2;  // ALU command bit width
   wire [D-1:0] target,  // jump 
   prog_ctr;
 

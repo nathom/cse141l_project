@@ -23,7 +23,7 @@ module Control #(
     RegWrite = 'b1;  // 0: for store or no op  1: most other operations 
     MemtoReg = 'b0;  // 1: load -- route memory instead of ALU to reg_file data in
     ALUOp    = 'b111;  // y = a+0;
-    MoveCtrl = 'b0;
+    MoveCtrl = 'b0; // 1: if mov, 0: otherwise
     // sample values only -- use what you need
     case (instr)  // override defaults with exceptions
       /* All instructions:
@@ -35,8 +35,8 @@ module Control #(
       * 011: load
       * 100: store
       * 101: move
-      * J type:
       * 110: BNE
+      * J type:
       * 111: SET
       */
       'b000: begin  // add
@@ -50,8 +50,6 @@ module Control #(
       'b010: begin  // NAND
         ALUOp = 'b10;
       end
-
-
 
       'b011: begin  // load
         MemtoReg = 'b1;  // 
@@ -68,8 +66,13 @@ module Control #(
       // Moves value from r0 to r1
       // move r1, r0
       'b101: begin
-        RegWrite = 'b1;
         MoveCtrl = 'b1;
+      end
+
+      // BEQ r0, r1
+      // branches to OUT if r0 == r1
+      'b111: begin
+        Branch = 'b1;
       end
     endcase
 
