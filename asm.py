@@ -77,8 +77,16 @@ registers = {
     "out": "111",
 }
 
-r_re = re.compile(r"\s*(\w+)\s+(\w+),?\s+(\w+)\s*")
-i_re = re.compile(r"\s*(\w+)\s+(\d+)\s*")
+# some whitespace
+pre = r"^\s*"
+# whitespace, followed by optional inline comment
+post = r"\s*(?:(?:\/\/|#|;).*)?$"
+# base pattern for each type of instruction
+r_re_str = r"(\w+)\s+(\w+),?\s+(\w+)"
+i_re_str = r"(\w+)\s+(\d+)"
+# regular expressions
+r_re = re.compile(pre + r_re_str + post)
+i_re = re.compile(pre + i_re_str + post)
 decimal = re.compile(r"\d+")
 
 
@@ -149,7 +157,7 @@ def main():
 
     with open(sys.argv[1]) as asm:
         for line in asm:
-            if line.startswith(("#", "//")):
+            if line.startswith(("#", "//", ";")):
                 continue
             bin = decode(line)
             if not debug:
