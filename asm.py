@@ -81,6 +81,8 @@ def main():
 
     with open(sys.argv[1]) as asm:
         for line in asm:
+            if line.startswith(("#", "//")):
+                continue
             bin = decode(line)
             outfile.write(bin)
 

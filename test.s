@@ -1,3 +1,4 @@
+# Works
 set 3
 mov r0, OUT
 set 4
