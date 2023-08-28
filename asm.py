@@ -1,5 +1,46 @@
 """
 An assembler for the LEAP architecture.
+
+5 General purpose registers:
+    r0-r4
+
+1 Arithmetic Intermediate register:
+    r5
+
+    This is used to hold intermediate values when
+    calculating XOR, AND, and OR. This means
+    the value will not persist after any one of
+    these functions are called. Only use it if you
+    are not depending on that.
+
+1 Output register:
+    OUT (111)
+
+    This is where the output of all R type instructions
+    are stored, except MOV, which doesn't have an output.
+
+1 Parity bit register:
+    PAR
+
+    This is always equal to ^OUT.
+
+Instructions:
+
+str r1, r0
+
+Stores the value in r1 to mem[r0].
+
+ldr r1, r0
+
+Loads the value in mem[r0] to r1.
+
+mov r1, r0
+
+Moves the value in r0 to r1.
+
+xor r1, r0
+
+Sets OUT to the bitwise XOR between r1 and r0. Uses AI register!
 """
 
 import re
