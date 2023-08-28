@@ -38,11 +38,21 @@ def decode_mov_imm(match):
 
 
 def decode_and(reg1, reg0):
-    pass
+    ops = [
+        f"nand {reg1}, {reg0}",
+        f"nand out, out",
+    ]
+    return "".join(decode(op) for op in ops)
 
 
 def decode_orr(reg1, reg0):
-    pass
+    ops = [
+        f"nand {reg1}, {reg1}",
+        f"mov r5, OUT",
+        f"nand {reg0}, {reg0}",
+        f"nand r5, OUT",
+    ]
+    return "".join(decode(op) for op in ops)
 
 
 r_ops = {
