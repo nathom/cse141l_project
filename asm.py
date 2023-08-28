@@ -1,5 +1,49 @@
+"""
+An assembler for the LEAP architecture.
+"""
+
 import re
 import sys
+
+
+# xor reg1, reg0
+def decode_xor(reg1, reg0):
+    # NAND r0  r1
+    # MOV  AI  OUT
+    # NAND r0  AI
+    # MOV  AI  OUT
+    # NAND r0  r1
+    # NAND OUT r1
+    # NAND OUT AI
+    ops = [
+        f"nand {reg1}, {reg0}",
+        f"mov r5, OUT",
+        f"nand {reg1}, r5",
+        f"mov r5, OUT",
+        f"nand {reg1}, {reg0}",
+        f"nand OUT, {reg0}",
+        f"nand OUT, r5",
+    ]
+    return "".join(decode(line) for line in ops)
+
+
+def decode_mov_imm(match):
+    op, reg1, imm = match.groups()
+    assert op == "mov"
+    ops = [
+        f"set {imm}",
+        f"mov {reg1}, out",
+    ]
+    return "".join(decode(op) for op in ops)
+
+
+def decode_and(reg1, reg0):
+    pass
+
+
+def decode_orr(reg1, reg0):
+    pass
+
 
 r_ops = {
     "add": "000",
@@ -10,6 +54,7 @@ r_ops = {
     "mov": "101",
     "beq": "110",
 }
+pseudo_ops = {"xor": decode_xor, "and": decode_and, "orr": decode_orr}
 i_ops = {"set": "111"}
 registers = {
     "r0": "000",
@@ -18,12 +63,13 @@ registers = {
     "r3": "011",
     "r4": "100",
     "r5": "101",
-    "r6": "110",
+    "par": "110",
     "out": "111",
 }
 
 r_re = re.compile(r"\s*(\w+)\s+(\w+),?\s+(\w+)\s*")
 i_re = re.compile(r"\s*(\w+)\s+(\d+)\s*")
+decimal = re.compile(r"\d+")
 
 
 def decode(line: str) -> str:
@@ -31,6 +77,16 @@ def decode(line: str) -> str:
     i_match = i_re.match(line)
 
     if r_match is not None:
+        op, r1, r0 = r_match.groups()
+
+        if op == "mov" and decimal.match(r0):
+            return decode_mov_imm(r_match)
+
+        # expand into native operations
+        pf = pseudo_ops.get(op)
+        if pf is not None:
+            return pf(r1, r0)
+
         return decode_r(r_match)
     elif i_match is not None:
         return decode_i(i_match)
@@ -75,8 +131,10 @@ def main():
         return
 
     if len(sys.argv) == 2:
+        debug = True
         outfile = sys.stdout
     else:
+        debug = False
         outfile = open(sys.argv[2], "w")
 
     with open(sys.argv[1]) as asm:
@@ -84,7 +142,10 @@ def main():
             if line.startswith(("#", "//")):
                 continue
             bin = decode(line)
-            outfile.write(bin)
+            if not debug:
+                outfile.write(bin)
+            else:
+                outfile.write(f"# {line.strip()}\n{bin}")
 
 
 if __name__ == "__main__":
