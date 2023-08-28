@@ -93,6 +93,7 @@ module top_level (
       .dat_in  (regfile_dat),  // loads, most ops
       .clk,
       .wr_en   (RegWrite),
+      .par(pariQ),
       .rd_addrA(rd_addrA),
       .rd_addrB(MoveCtrl ? rd_addrA : rd_addrB), // passthrough register
       .wr_addr (MoveCtrl ? rd_addrB : 'b111),
@@ -128,6 +129,6 @@ module top_level (
     else if (sc_en) sc_in <= sc_o;
   end
 
-  assign done = prog_ctr == 10;
+  assign done = prog_ctr == 128;
 
 endmodule
