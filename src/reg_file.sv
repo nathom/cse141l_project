@@ -7,9 +7,9 @@ module reg_file #(
     input                 clk,
     input                 wr_en,    // write enable
     input        [pw-1:0] wr_addr,  // write address pointer
-    input                 par,      // to set core[6] = parity
     rd_addrA,  // read address pointers
     rd_addrB,
+    input                 par,      // to set core[6] = parity
     output logic [   7:0] datA_out, // read data
     datB_out
 );

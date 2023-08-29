@@ -52,11 +52,13 @@ module Control #(
       end
 
       'b011: begin  // load
-        MemtoReg = 'b1;  // 
+        MemtoReg = 'b1;
+        MoveCtrl = 'b1;
       end
 
-      // Stores value 123 into address contained in r0
-      // STR r0, 123
+      // Stores value in r1 to address in r0
+      // mem[r0] = r1
+      // STR r1, r0
       'b100: begin
         // ALUOp = 'b111;
         MemWrite = 'b1;

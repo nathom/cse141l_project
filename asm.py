@@ -198,7 +198,7 @@ def main():
 
     with open(sys.argv[1]) as asm:
         for line in asm:
-            if line.startswith(("#", "//", ";")):
+            if line.startswith(("#", "//", ";")) or len(line.strip()) == 0:
                 continue
             bin = decode(line)
             if not debug:

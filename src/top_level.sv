@@ -31,10 +31,6 @@ module top_level (
   wire [  8:0] mach_code;  // machine code
   wire [2:0] rd_addrA, rd_addrB;  // address pointers to reg_file
 
-  // mov r0, OUT
-  // A = 000
-  // B = 111
-
   // All types
   assign instr = mach_code[8:6];
   // R type
