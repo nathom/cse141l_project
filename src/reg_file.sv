@@ -9,15 +9,28 @@ module reg_file #(
     input        [pw-1:0] wr_addr,  // write address pointer
     rd_addrA,  // read address pointers
     rd_addrB,
+    input                 par,      // to set core[6] = parity
     output logic [   7:0] datA_out, // read data
-    datB_out
+    datB_out,
+    out_reg
 );
 
   logic [7:0] core[2**pw];  // 2-dim array  8 wide  16 deep
 
+  // direct access to OUT
+  assign out_reg = core[7];
+
   // reads are combinational
-  assign datA_out = core[rd_addrA];
-  assign datB_out = core[rd_addrB];
+  always_comb begin
+    if (rd_addrA == 6) datA_out = {7'b0, par};
+    else datA_out = core[rd_addrA];
+  end
+
+  always_comb begin
+    if (rd_addrB == 6) datB_out = {7'b0, par};
+    else datB_out = core[rd_addrB];
+  end
+
 
   // writes are sequential (clocked)
   always_ff @(posedge clk)
