@@ -11,10 +11,14 @@ module reg_file #(
     rd_addrB,
     input                 par,      // to set core[6] = parity
     output logic [   7:0] datA_out, // read data
-    datB_out
+    datB_out,
+    out_reg
 );
 
   logic [7:0] core[2**pw];  // 2-dim array  8 wide  16 deep
+
+  // direct access to OUT
+  assign out_reg = core[7];
 
   // reads are combinational
   always_comb begin
@@ -26,6 +30,7 @@ module reg_file #(
     if (rd_addrB == 6) datB_out = {7'b0, par};
     else datB_out = core[rd_addrB];
   end
+
 
   // writes are sequential (clocked)
   always_ff @(posedge clk)

@@ -13,8 +13,7 @@ module top_level (
   wire RegDst, Branch, MemtoReg, MemWrite, ALUSrc, RegWrite, MoveCtrl;
   wire [1:0] ALUOp;
   wire [2:0] instr;
-
-  wire [7:0] datA, datB,  // from RegFile
+  wire [7:0] datA, datB, out,  // from RegFile
   muxB, rslt,  // alu output
   immed,  // immediate value
   mem_out_data,  // output from reading data memory
@@ -26,9 +25,9 @@ module top_level (
       zeroQ;  // registered zero flag from ALU 
   wire relj;  // from control to PC; relative jump enable
   wire absj = 0;
-  wire pari, zero, sc_clr, sc_en;  // immediate switch
-  wire [A-1:0] alu_cmd;
-  wire [  8:0] mach_code;  // machine code
+  wire pari, zero, eq, sc_clr, sc_en;  // immediate switch
+  wire reljump_en;
+  wire [8:0] mach_code;  // machine code
   wire [2:0] rd_addrA, rd_addrB;  // address pointers to reg_file
 
   // All types
@@ -38,7 +37,9 @@ module top_level (
   assign rd_addrB = mach_code[5:3];
   assign rd_addrA = mach_code[2:0];
   // I type
-  assign immed = mach_code[5:0];
+  assign immed = {2'b0, mach_code[5:0]};
+
+  assign reljump_en = relj && eq;
 
   // fetch subassembly
   PC #(
@@ -47,19 +48,19 @@ module top_level (
       pc1 (
       .reset,
       .clk,
-      .reljump_en(relj),
+      .reljump_en(reljump_en),
       .absjump_en(absj),
       .target,
       .prog_ctr
   );
 
   // lookup table to facilitate jumps/branches
-  // PC_LUT #(
-  //     .D(D)
-  // ) pl1 (
-  //     .addr(how_high),
-  //     .target
-  // );
+  PC_LUT #(
+      .D(D)
+  ) pl1 (
+      .addr(out[1:0]),
+      .target
+  );
 
   // contains machine code
   instr_ROM ir1 (
@@ -94,7 +95,8 @@ module top_level (
       .rd_addrB(MoveCtrl ? rd_addrA : rd_addrB), // passthrough register
       .wr_addr (MoveCtrl ? rd_addrB : 'b111),
       .datA_out(datA),
-      .datB_out(datB)
+      .datB_out(datB),
+      .out_reg(out)
   );
 
   assign muxB = ALUSrc ? immed : datB;
@@ -103,9 +105,10 @@ module top_level (
       .alu_cmd(ALUOp),
       .inA    (datA),
       .inB    (muxB),
-      .sc_i   (sc_in),  // output from sc register
+      // .sc_i   (sc_in),  // output from sc register
+      .eq     (eq),
       .rslt,
-      .sc_o   (sc_o),   // input to sc register
+      // .sc_o   (sc_o),   // input to sc register
       .pari
   );
 

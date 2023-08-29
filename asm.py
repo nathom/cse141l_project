@@ -273,14 +273,12 @@ def main():
         debug = False
         outfile = open(sys.argv[2], "w")
 
-    debug = False
     out_lines: list[str] = []
     with open(sys.argv[1]) as asm:
         for line in asm:
             if line.startswith(("#", "//", ";")) or len(line.strip()) == 0:
                 continue
             bin = decode(line)
-            # assert len(bin) == 9, len(bin)
             if not debug:
                 out_lines.extend(bin.split("\n"))
             else:
