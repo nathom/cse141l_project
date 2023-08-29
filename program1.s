@@ -122,11 +122,11 @@ Mov r2, OUT		//Now r2 holds lsb rrt(4) & 11110000 |((lsb & 00000001) rrt(5) & 11
 
 
 //Red Bold
-Mov r4, 01000000
+Mov r4, 0b01000000
 And r3, r4		//Mask parity bits to grab p4 bit
 Rot OUT, 10	//Rotates by 10 to get into lowest bit first
 Mov r4, OUT 	//r4 now holds p4 rrt(4)
-Mov OUT, 11110000
+Mov OUT, 0b11110000
 And OUT, r4
 Mov r4, OUT	//Finishes p4 rrt(4) & 11110000
 Orr r2, r4
@@ -134,11 +134,11 @@ Mov r2, OUT	//r2 now holds the first 3 or statements (r4 free again)
 
 
 //Handling p2 bit
-Mov r4, 00100000
+Mov r4, 0b00100000
 And r3, r4		//Mask parity bits to grab p2 bit
 Rot OUT, 3
 Mov r4, OUT 	//r4 now holds p2 rrt(6)since it rotates twice
-Mov OUT, 11111100
+Mov OUT, 0b11111100
 And OUT, r4
 Mov r4, OUT	//Finishes p2 rrt(6) & 11111100
 Orr r2, r4
@@ -146,11 +146,11 @@ Mov r2, OUT	//r2 now holds the first 4 or statements (r4 free again)
 
 
 //Handling p1 bit
-Mov r4, 00010000
+Mov r4, 0b00010000
 And r3, r4		//Mask parity bits to grab p1 bit
 Rot OUT, 7
 Mov r4, OUT 	//r4 now holds p2 rrt(6)since it rotates twice
-Mov OUT, 11111110
+Mov OUT, 0b11111110
 And OUT, r4
 Mov r4, OUT	//Finishes p1 rrt(7) & 11111110
 Orr r2, r4
@@ -158,7 +158,7 @@ Mov r2, OUT	//r1 now holds the first 4 or statements (r4 free again)
 
 
 //Handling p0 case
-Mov r4, 00001000
+Mov r4, 0b00001000
 And r4, r3
 Rot OUT, 3
 Mov r4, OUT		//p4 now holds p0
