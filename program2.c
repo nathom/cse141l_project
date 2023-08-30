@@ -52,10 +52,11 @@ For (int i = 0; i < 32; i += 2) {
 		//Lsb_out = lsb ^ (1 << hamming);
 		//No need for masking?
 		lsb_out = lsb ^ (1 rrt(8 - hamming));
-	} else {
+	} 
+	else {
 		lsb_out = msb ^ (1 rrt(hamming - 16));
 	}
-
+	
 	unsigned char lout = 0;
 	lout |= (lsb_out rrt(3) & 0b00011111) & 0b00000001
 	lout |= (lsb_out rrt(4) & 0b00001111) & 0b00001111
@@ -67,5 +68,5 @@ For (int i = 0; i < 32; i += 2) {
 
 	mem[i] = lout;
 	mem[i+1] = hout | 0b0100_0000;
-}
+	}
 }
