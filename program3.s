@@ -8,130 +8,130 @@ OUT - default output register
 */
 
 // Initialize variables
-Char mem[32]; 
-Mov r0, 0 // int i = 0
-Mov r1, 32
-Mov r2, 0 // count = 0
-Mov r3, 0 // byte_count = 0
+; Char mem[32]; 
+mov r0, 0 // int i = 0
+mov r1, 32
+mov r2, 0 // count = 0
+mov r3, 0 // byte_count = 0
 
 // For loop 
-Set Loop_end
-Beq r0, r1 //  Stop when r0(i) = r1(32)
-Ldr r1, r0 // r1 = mem[i]
-Mov r4, r1 // b = mem[i]
-Mov r1, 1
-Add r0, r1 // r1 can be used after assigning b (OUT = increment i by 1)
+set Loop_end
+beq r0, r1 //  Stop when r0(i) = r1(32)
+ldr r1, r0 // r1 = mem[i]
+mov r4, r1 // b = mem[i]
+mov r1, 1
+add r0, r1 // r1 can be used after assigning b (OUT = increment i by 1)
 
 // parts a and b
 // If ((b & (1111_1000)) == pattern) {count++; occurred = 1}
-Mov r3, 0b1111_1000 // byte_count not needed for 1st If, can use r3
-And r4, r3  // OUT = b & (1111_1000)
+mov r3, 0b1111_1000 // byte_count not needed for 1st If, can use r3
+and r4, r3  // OUT = b & (1111_1000)
 
-Set if1
-Beq OUT, =mem // b & (1111_1000) == pattern 
+set if1
+beq OUT, =mem // b & (1111_1000) == pattern 
 if1:
-Add r2, 1 // count++
-Mov r1, 1// r1 = occurred = 1 (Remember to return r1 to 32 for the for loop)
+add r2, 1 // count++
+mov r1, 1// r1 = occurred = 1 (Remember to return r1 to 32 for the for loop)
 
-Set if2
-Beq r1, 1 // If (occurred) byte_count++;
+set if2
+beq r1, 1 // If (occurred) byte_count++;
 if2:
-Add r3, 1 // byte_count++
+add r3, 1 // byte_count++
 
 // part c		
-Mov r1, 0 // totalCount = 0
-Set if3
-Beq r0, 31    // if(i != 31) 
+mov r1, 0 // totalCount = 0
+set if3
+beq r0, 31    // if(i != 31) 
 
 
 
 (TODO) // If(((b & 0000_1111) << 1)...)
-Set OUT, 1
-Add r0, OUT // OUT = i + 1
-Ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
-Rot r1, 7
-Set OUT, 0b00000001
-And r1, OUT // Out = (mem[i + 1] rrt(7) & 0b00000001) = A
-Mov rX, OUT // rX holds OUT for an OR
+set OUT, 1
+add r0, OUT // OUT = i + 1
+ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
+rot r1, 7
+set OUT, 0b00000001
+and r1, OUT // Out = (mem[i + 1] rrt(7) & 0b00000001) = A
+mov rX, OUT // rX holds OUT for an OR
 
-Mov r1, 0b00001111 
-And r4, r1 // OUT = (b & 0b00001111)
-Rot OUT, 7 // (b & 0b00001111) << 1)
-Or OUT, rX // OUT = OUT | rX
+mov r1, 0b00001111 
+and r4, r1 // OUT = (b & 0b00001111)
+rot OUT, 7 // (b & 0b00001111) << 1)
+or OUT, rX // OUT = OUT | rX
 
-Set if4
-Beq rX, =mem // A == pattern
+set if4
+beq rX, =mem // A == pattern
 
 if4:
-Add rX, rY// totalcount++
+add rX, rY// totalcount++
 
 (TODO) // If(((b & 0000_0111) << 2)...)
-Set OUT, 1
-Add r0, OUT // OUT = i + 1
-Ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
-Rot r1, 7
-Set OUT, 0b00000011
-And r1, OUT // Out = (mem[i + 1] rrt(6) & 0b00000011) = A
-Mov rX, OUT // rX holds OUT for an OR 
+set OUT, 1
+add r0, OUT // OUT = i + 1
+ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
+rot r1, 7
+set OUT, 0b00000011
+and r1, OUT // Out = (mem[i + 1] rrt(6) & 0b00000011) = A
+mov rX, OUT // rX holds OUT for an OR 
 
-Mov r1, 0b00000111 
-And r4, r1 // OUT = (b & 0b00000111)
-Rot OUT, 6 // OUT = (b & 0b00000111) << 2)
-Or OUT, rX // OUT = (OUT | rX)
+mov r1, 0b00000111 
+and r4, r1 // OUT = (b & 0b00000111)
+rot OUT, 6 // OUT = (b & 0b00000111) << 2)
+or OUT, rX // OUT = (OUT | rX)
 
-Set if5
-Beq rX, =mem // A == pattern
+set if5
+beq rX, =mem // A == pattern
 
 if5:
-Add rX, rY// totalcount++
+add rX, rY// totalcount++
 
-Set if6
-Beq rX, =mem // A == pattern
+set if6
+beq rX, =mem // A == pattern
 
 if6:
-Add rX, rY// totalcount++
+add rX, rY// totalcount++
 
 (TODO) // If(((b & 0000_0011) << 3)...)
-Set OUT, 1
-Add r0, OUT // OUT = i + 1
-Ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
-Rot r1, 7
-Set OUT, 0b00000111
-And r1, OUT // Out = (mem[i + 1] rrt(5) & 0b00000111) = A
-Mov rX, OUT // rX holds OUT for an OR
+set OUT, 1
+add r0, OUT // OUT = i + 1
+ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
+rot r1, 7
+set OUT, 0b00000111
+and r1, OUT // Out = (mem[i + 1] rrt(5) & 0b00000111) = A
+mov rX, OUT // rX holds OUT for an OR
 
-Mov r1, 0b00000011
-And r4, r1 // OUT = b & 0b00000011
-Rot OUT, 5 // (b & 0b00000011) << 3
+mov r1, 0b00000011
+and r4, r1 // OUT = b & 0b00000011
+rot OUT, 5 // (b & 0b00000011) << 3
 
-Set if6
-Beq rX, =mem // A == pattern
+set if6
+beq rX, =mem // A == pattern
 
 if6:
-Add rX, rY// totalcount++
+add rX, rY// totalcount++
 
 (TODO) // If(((b & 0000_0001) << 4)...)
-Mov OUT, 1
-Add r0, OUT // OUT = i + 1
-Ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
-Rot r1, 7
-Set OUT, 0b00001111
-And r1, OUT // Out = (mem[i + 1] rrt(4) & 0b00001111) = A
-Mov rX, OUT // rX holds OUT for an OR
+mov OUT, 1
+add r0, OUT // OUT = i + 1
+ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
+rot r1, 7
+set OUT, 0b00001111
+and r1, OUT // Out = (mem[i + 1] rrt(4) & 0b00001111) = A
+mov rX, OUT // rX holds OUT for an OR
 
-Mov r1, 0000_0001
-And r4, r1 // OUT = b & 0000_0001
-Rot OUT, 4 // OUT = (b & 0000_0001) << 4
+mov r1, 0000_0001
+and r4, r1 // OUT = b & 0000_0001
+rot OUT, 4 // OUT = (b & 0000_0001) << 4
 
-Set if7
-Beq rX, =mem // A == pattern
+set if7
+beq rX, =mem // A == pattern
 
 if7:
-Add rX, rY// totalcount++
+add rX, rY// totalcount++
 
 if3:
-Add rX r2// totalCount += count
+add rX r2// totalCount += count
 
 
-Mov r1, 1 // Return r1 to 32 for for loop
-Loop_end:
+mov r1, 1 // Return r1 to 32 for for loop
+loop_end:

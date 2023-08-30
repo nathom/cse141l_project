@@ -8,16 +8,19 @@ r5 - Immediate register for XOR
 
 IMPORTANT NOTE - For r3, the format is going to be the XOR of p0 and the expected
  */
-mov r0, 30   // set r0 = 30
-mov r1, 62
-set loop_end // set addr to OUT
-beq r0, r1
+mov r0, 0   // set r0 = i = 0
+loop_start:
+mov r4, 32
+set loop_end
+beq r0, r4
 
-// r1 for msb, r2 for lsb
-ldr r1, r0          // r1 = mem[i] replaces MSB
-mov r2, 1
-add r0, r2          // OUT = i + 1
-ldr r2, OUT         // r2 = mem[OUT] = mem[i+1] replaces LSb
+// r1 = msb, r2 = lsb
+set 30
+add r0, OUT // OUT = i + 30
+ldr r1, OUT          // r1 = mem[i + 30] replaces MSB
+set 31
+add r0, OUT
+ldr r2, OUT // r2 = mem[i + 31]
 
 // Format p8_p4_p2_p1_p0_000
 
@@ -327,9 +330,12 @@ rot r2, OUT
 //needs to decrement by 30?
 //TODO lines 69 and 70
 
+str r1, r0 ; mem[i] = r1
+set 1
+add r0, OUT ; OUT = i + 1
+str r4, OUT ; mem[i+1] = r4
 
-mov r1, 2
-add r0, r1  //  OUT = i + 2
-mov r0, OUT // set i = OUT
+set loop_start
+beq r0, r0 ; unconditional branch back up
 loop_end:
 mov r0, r0
