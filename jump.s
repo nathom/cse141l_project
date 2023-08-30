@@ -1,4 +1,4 @@
-# The tough one
+# Working
 # Calculate sum of successive integers
 
 # initialize loop
