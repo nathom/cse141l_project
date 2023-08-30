@@ -1,4 +1,4 @@
-For (int i = 0; i < 32; i += 2) {
+for (int i = 0; i < 32; i += 2) {
 
     char *b = mem + i;
     char msw = mem[i+30], lsw = mem[i+30+1];
@@ -41,14 +41,14 @@ For (int i = 0; i < 32; i += 2) {
     } 
 
 	else {
-	Int hamming = 0;
-	If (p8 != p8_exp) hamming += 8;
-	If (p4 != p4_exp) hamming += 4;
+	int hamming = 0;
+	if (p8 != p8_exp) hamming += 8;
+	if (p4 != p4_exp) hamming += 4;
     If (p2 != p2_exp) hamming += 2;
-	If (p1 != p1_exp) hamming += 1;
+	if (p1 != p1_exp) hamming += 1;
 	
 	// flip bit at position `hamming`
-	If (hamming < 8) {
+	if (hamming < 8) {
 		//Lsb_out = lsb ^ (1 << hamming);
 		//No need for masking?
 		lsb_out = lsb ^ (1 rrt(8 - hamming));
@@ -66,7 +66,7 @@ For (int i = 0; i < 32; i += 2) {
 	hout = (msb_out rrt(5) & 0b00000111)
 
 
-	mem[i] = lout;
-	mem[i+1] = hout | 0b0100_0000;
+	mem[i+1] = lout;
+	mem[i] = hout | 0b0100_0000;
 	}
 }
