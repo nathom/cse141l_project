@@ -259,6 +259,8 @@ def process_branch(bin_line: str, pc: int) -> tuple[str, int]:
 
 
 def main():
+    # TODO: implement rot reg, imm
+    # TODO: implement set 0b
     global LUT_ENABLED
     LUT_ENABLED = True
 

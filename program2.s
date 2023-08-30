@@ -25,7 +25,8 @@ ldr r2, OUT         // r2 = mem[OUT] = mem[i+1] replaces LSb
 mov r4, 0b00000001
 and r2, r4          // OUT = lsb & 0b00000001
 mov r4, OUT
-rot r4, 5
+set 5
+rot r4, OUT
 orr OUT, r3         // Stores p0 bit in 4th bit position
 
 
@@ -82,7 +83,8 @@ mov r4, 0b11111110
 and r4, r2          // lsb & 0b11110000
 xor OUT, r1         // msb ^ lsb & 11111110
 mov r4, par         // r4 holds p0_exp
-rot r4, 5           // r4 is now 0000_p0exp_000
+set 5
+rot r4, OUT           // r4 is now 0000_p0exp_000
 mov r4, OUT
 xor r4, r3          // If its the same then the equivalent bit in r3 should be 0
 mov r3, OUT
@@ -95,7 +97,8 @@ set 0b10101000 // temporarily storing in output register
 and OUT, r2         // lsb & 0b10101000
 xOR OUT, r4         // (msb & 0b10101010) ^ (lsb & 0b10101000)
 mov r4, par         // r4 now holds p1_exp
-rot r4, 4           // p1_exp in proper bit position
+set 4
+rot r4, OUT           // p1_exp in proper bit position
 mov r4, OUT
 xor r4, r3          // Xor just the p1 bit position
 mov r3, OUT
@@ -108,7 +111,8 @@ set 0b11001000 // temporarily storing in output register
 and OUT, r2         // lsb & 0b11001000
 xOR OUT, r4         // (msb & 0b11001100) ^ (lsb & 0b11001000)
 mov r4, par         // r4 now holds p2_exp
-rot r4, 3           // p2_exp in proper bit position
+set 3
+rot r4, OUT           // p2_exp in proper bit position
 mov r4, OUT
 xor r4, r3          // Xor just the p2 bit position
 mov r3, OUT
@@ -116,24 +120,28 @@ mov r3, OUT
 
 // TODO p4_exp
 mov r4, 0b00001111
-rot r1, 4
+set 4
+rot r1, OUT
 and OUT, r4         // msb rrt(4) & 0b00001111
 mov r4, OUT         // r4 now has ^^
 set 0b10101000
 and OUT, r2         // lsb & 0b10101000
 xor OUT, r4         // (lsb & 0b10101000) ^ (msb rrt(4) & 0b00001111)
 mov r4, par
-rot r4, 2
+set 2
+rot r4, OUT
 mov r4, OUT
 xor r4, r3          // Xor just the p4 bit position
 mov r3, OUT
 
 // TODO p8_exp
 mov r4, 0b01111111
-rot r1, 1
+set 1
+rot r1, OUT
 and r1, r4          // OUT = msb rrt(1) & 0b01111111
 mov r4, par         // r4 now holds p8
-rot r4, 1           // p8 in proper bit position
+set 1
+rot r4, OUT           // p8 in proper bit position
 mov r4, OUT
 xor r4, r3          // Xor just the p8 bit position
 mov r3, OUT
@@ -141,14 +149,16 @@ mov r3, OUT
 // Idk if its smart to set something to zero here but i'm going to do it anyways
 // line 25
 mov r4, 0b00011111
-rot r2, 3
+set 3
+rot r2, OUT
 and OUT, r4          // lsb rrt(3) & 0b00011111
 mov r4, 0b00000001   
 and r4, OUT          // (lsb rrt(3) & 0b00011111) & 0b00000001
 // line 26
 mov r1, OUT          // Temporarily replacing MSB with AND result
 mov r4, 0b00001111
-rot r2, 4
+set 4
+rot r2, OUT
 and OUT, r4         // OUT = lsb rrt(4) & 0b00001111
 mov r4, 0b00001110
 and r4, OUT         // (lsb rrt(4) & 0b00001111) & 0b00001110
@@ -157,7 +167,8 @@ mov r2, OUT         // Temporarily storing the new or operation in r2
 ldr r1, r0          // r1 = mem[i] returns MSB to original value
 // line 27
 mov r4, 0b11111000
-rot r1, 5
+set 5
+rot r1, OUT
 and r1, r4          // msb rrt(5) & 0b11111000
 mov r4, 0b11110000
 and OUT, r4
@@ -166,7 +177,8 @@ mov r2, OUT         // r2 now holds the final lout
 
 // hout
 mov r4, 0b00000111
-rot r1, 5
+set 5
+rot r1, OUT
 and OUT, r4
 mov r1, OUT         // r1 now holds hout
 
@@ -187,7 +199,8 @@ str r1, r0, -31
 mov r4, 0b00000000          //Int hamming = 0;
 
 //First checking if p8 bit is bad
-rot r3, 7
+set 7
+rot r3, OUT
 mov r1, OUT         //r1 now holds the temporary shifted r3 
 set 0b00000001      //OUT now has the mask
 and r1, OUT         //masks the rotation so that its only one bit
@@ -202,7 +215,8 @@ mov r4, OUT
 
 //Checking p4 bit
 parityfour:
-rot r3, 6
+set 6
+rot r3, OUT
 mov r1, OUT
 set 0b00000001
 and r1, OUT
@@ -215,7 +229,8 @@ mov r4, OUT
 
 //Checking p2 bit
 paritytwo:
-rot r3, 5
+set 5
+rot r3, OUT
 mov r1, OUT
 set 0b00000001
 and r1, OUT
@@ -228,7 +243,8 @@ mov r4, OUT
 
 //Checking p1 bit
 parityone:
-rot r3, 4
+set 4
+rot r3, OUT
 mov r1, OUT
 set 0b00000001
 and r1, OUT
@@ -258,7 +274,8 @@ set ge_eight
 //At this point, r1 should hold lsb_out and r2 should hold msb_out
 ge_eight:
 mov r4, 0b00000000
-rot r1, 3
+set 3
+rot r1, OUT
 mov r4, OUT         //r4 now holds lsb_out rrt(3)
 set 0b00000001
 and OUT, r4
@@ -266,7 +283,8 @@ mov r4, OUT         //r4 now holds the first lout expression
 //we don't have to do the orr function for the first one because or'ing with zero is always itself
  
 //second lout expression
-rot r1, 4
+set 4
+rot r1, OUT
 mov r1, OUT         //we are using r1 now because we no longer need lsb_out for this cycle
 set 0b00001111
 and r1, OUT         //OUT now contains lsb_out rrt(4) & 0b00001111
@@ -277,7 +295,8 @@ orr OUT, r4         //orring with previous lout
 mov r4, OUT
 
 //third lout expression
-rot r2, 5
+set 5
+rot r2, OUT
 mov r1, OUT
 set 0b11111000
 and r1, OUT
@@ -298,7 +317,8 @@ r5 is the tempoarary XOR register
 
  //Using r1 for hout
  mov r1, 0b00000000
- rot r2, 5
+ set 5
+rot r2, OUT
  mov r3, OUT
  set 0b00000111
  and r3, OUT
