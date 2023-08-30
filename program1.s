@@ -94,13 +94,14 @@ and r4, OUT
 mov r4, OUT        // R4 now holds p8 BIT
 orr r1, r2         // OUT now holds the first or statement
 orr OUT, r4        // Final Or
-ldr r1, r0         // Returns original value for MSB
+mov r1, OUT		   //r1 should hold out_msw
+
 mov r2, 1
 add r0, r2         // OUT = i + 1
 ldr r2, OUT        // r2 = mem[OUT] = mem[i+1] R2 now has LSB
 
 
-// What does this do? -> output LSW
+// output LSW
 /*lsb rrt(4) & 11110000 | p4 rrt(4) & 11110000 | ((lsb & 00000001) rrt(5) & 11111000 | 
 p2 rrt(6) & 11111100 | p1 rrt(7) & 11111110 | p0
 */
@@ -163,7 +164,18 @@ and r4, r3
 rot OUT, 3
 mov r4, OUT		//p4 now holds p0
 orr r2, r4
-mov r2, OUT		//r2 now holds the entire expression
+mov r2, OUT		//r2 now holds out_lsw
+
+mov r4, 30
+add r4, r0		//OUT now holds i + 30
+mov r4, OUT
+str r1, r4		//mem[i+30] = out_lsw
+
+
+set 0b00000001
+add r4, OUT
+mov r4, OUT
+str r2, r4		//mem[i+31] = out_msw
 
 // TODO Must bring result back into mem[]
 // What does this mean? -> OUT, parity Is this translating properly?
