@@ -268,18 +268,48 @@ mov r2, 1
 add r0, r2          // OUT = i + 1
 ldr r2, OUT         // r2 = mem[OUT] = mem[i+1] replaces LSb
 
-mov r3, 8           //r1 just holds and checks if hamming is 
-set ge_eight
+set 0b11111000      //< 8 check
+and OUT, r4         //OUT now has hamming & 0b1111_1000
+mov r3, OUT
+mov r5, 0b00000000
+set lt_eight
+beq r5, r3         //checks if r4 == 0 which determines whether it is greater   
 
-//TODO how to check if hamming is less than 8
-//TODO need to fill in liness 51-58
+//Case: GE Eight
+mov r3, 0b11110000  //should be -16?
+add r3, r4          //OUT = hamming - 16
+mov r3, OUT         //r3 = ^^
+set 0b00000001
+rot OUT, r3
+xor r1, OUT
+mov r1, OUT         //r1 now has msb_out
+set end_if_else
+beq r1, r1          //unconditional branch to end of if statement
 
-//At this point, r1 should hold lsb_out and r2 should hold msb_out
-ge_eight:
+//r1 = msb_out ; r2 = lsb_out
+lt_eight:
+//Case LT Eight
+nand r4, r4         //OUT = flipped bits of hamming
+mov r4, 0b00000001
+add OUT, r4         
+mov r4, OUT         //r4 is now negative
+mov r3, 0b00001000
+add r3, r4          //8 - hamming
+mov r3, OUT         //r3 = ^^
+set 0b00000001
+rot OUT, r3         //(1 rrt(8 - hamming))
+xor r2, OUT
+mov r2, OUT
+
+//r1 = msb_out ; r2 = lsb_out
+end_if_else:
 mov r4, 0b00000000
 set 3
-rot r1, OUT
+rot r2, OUT
 mov r4, OUT         //r4 now holds lsb_out rrt(3)
+set 0b00011111
+and r4, OUT         //r4 = lsb_out rrt(3) & 0b00011111
+mov r4, OUT
 set 0b00000001
 and OUT, r4
 mov r4, OUT         //r4 now holds the first lout expression
@@ -287,32 +317,32 @@ mov r4, OUT         //r4 now holds the first lout expression
  
 //second lout expression
 set 4
-rot r1, OUT
-mov r1, OUT         //we are using r1 now because we no longer need lsb_out for this cycle
+rot r2, OUT
+mov r2, OUT         //we are using r2 now because we no longer need lsb_out for this cycle
 set 0b00001111
-and r1, OUT         //OUT now contains lsb_out rrt(4) & 0b00001111
-mov r1, OUT
+and r2, OUT         //OUT now contains lsb_out rrt(4) & 0b00001111
+mov r2, OUT
 set 0b00001111
-and r1, OUT
+and r2, OUT
 orr OUT, r4         //orring with previous lout 
 mov r4, OUT
 
 //third lout expression
 set 5
-rot r2, OUT
-mov r1, OUT
+rot r1, OUT         //rotating msb_out by 5
+mov r2, OUT         //still storing in r2 because we need r1 eventually for hout
 set 0b11111000
-and r1, OUT
-mov r1, OUT
+and r2, OUT
+mov r2, OUT
 set 0b11110000
-and r1, OUT
-orr r4, OUT
+and r2, OUT
+orr r4, OUT         
 mov r4, OUT         //r4 now has final lout
 
 /* So quick recap
 r0 is your counter, do not touch
-r1 holds garbage data (previously lsb_out), will now hold hout
-r2 holds msb_out
+r2 holds garbage data (previously lsb_out), will now hold hout
+r1 holds msb_out
 r3 holds garbage data (previously parity bits)
 r4 holds lout
 r5 is the tempoarary XOR register
@@ -321,7 +351,7 @@ r5 is the tempoarary XOR register
  //Using r1 for hout
  mov r1, 0b00000000
  set 5
-rot r2, OUT
+ rot r1, OUT
  mov r3, OUT
  set 0b00000111
  and r3, OUT
