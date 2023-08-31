@@ -21,7 +21,7 @@ module top_level_tb;
 
 
   initial begin
-    $monitor("Mem: r0: %d, r1: %d, r2: %d, r3: %d, r4: %d, r5: %d, r6: %d, out: %d",
+    $monitor("Mem: r0: %b, r1: %b, r2: %b, r3: %b, r4: %b, r5: %b, r6: %b, out: %b",
              dut.rf1.core[0], dut.rf1.core[1], dut.rf1.core[2], dut.rf1.core[3], dut.rf1.core[4],
              dut.rf1.core[5], dut.rf1.core[6], dut.rf1.core[7]);
     $display("Starting simulation...");

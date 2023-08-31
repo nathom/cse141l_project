@@ -5,12 +5,11 @@ module top_level (
     req,
     output logic done
 );
-  parameter D = 12,  // program counter width
-  A = 2;  // ALU command bit width
+  parameter D = 12;
   wire [D-1:0] target,  // jump 
   prog_ctr;
 
-  wire RegDst, Branch, MemtoReg, MemWrite, ALUSrc, RegWrite, MoveCtrl;
+  wire RegDst, MemtoReg, MemWrite, ALUSrc, RegWrite, MoveCtrl;
   wire [1:0] ALUOp;
   wire [2:0] instr;
   wire [7:0] datA, datB, out,  // from RegFile
@@ -40,6 +39,8 @@ module top_level (
   assign immed = {2'b0, mach_code[5:0]};
 
   assign reljump_en = relj && eq;
+  assign muxB = ALUSrc ? immed : datB;
+  assign regfile_dat = MemtoReg ? mem_out_data : rslt;
 
   // fetch subassembly
   PC #(
@@ -70,18 +71,17 @@ module top_level (
 
   // control decoder
   Control ctl1 (
-      .instr (instr),
-      .RegDst,
+      .instr(instr),
+      .RegDst(RegDst),
       .Branch(relj),
-      .MemtoReg,
-      .MemWrite,
-      .ALUSrc,
-      .RegWrite,
-      .MoveCtrl,
+      .MemtoReg(MemtoReg),
+      .MemWrite(MemWrite),
+      .ALUSrc(ALUSrc),
+      .RegWrite(RegWrite),
+      .MoveCtrl(MoveCtrl),
       .ALUOp
   );
 
-  assign regfile_dat = MemtoReg ? mem_out_data : rslt;
   // When moving, we read from A and write to addr of B
   // Otherwise, always write to OUT (addr 111)
   reg_file #(
@@ -99,7 +99,6 @@ module top_level (
       .out_reg(out)
   );
 
-  assign muxB = ALUSrc ? immed : datB;
 
   alu alu1 (
       .alu_cmd(ALUOp),

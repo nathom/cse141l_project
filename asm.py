@@ -24,7 +24,7 @@ An assembler for the LEAP architecture.
 
     This is always equal to ^OUT.
 
-Instructions:
+R-Type Instructions:
 
 str r1, r0
 
@@ -41,6 +41,16 @@ Moves the value in r0 to r1.
 xor r1, r0
 
 Sets OUT to the bitwise XOR between r1 and r0. Uses AI register!
+
+rot r1, r0
+
+Rotates the contents of r1 *right* by r0 spaces. 
+
+I-Type Instructions:
+
+set imm
+
+Sets the OUT register to imm, a constant value.
 """
 
 import re
@@ -71,6 +81,7 @@ def decode_xor(reg1, reg0):
 def decode_mov_imm(match):
     op, reg1, imm = match.groups()
     assert op == "mov"
+
     ops = [
         f"set {imm}",
         f"mov {reg1}, out",
@@ -81,7 +92,7 @@ def decode_mov_imm(match):
 def decode_and(reg1, reg0):
     ops = [
         f"nand {reg1}, {reg0}",
-        f"nand out, out",
+        f"nand OUT, OUT",
     ]
     return "".join(decode(op) for op in ops)
 
@@ -98,7 +109,7 @@ def decode_orr(reg1, reg0):
 
 r_ops = {
     "add": "000",
-    "rrot": "001",
+    "rot": "001",
     "nand": "010",
     "ldr": "011",
     "str": "100",
@@ -106,7 +117,6 @@ r_ops = {
     "beq": "110",
 }
 pseudo_ops = {"xor": decode_xor, "and": decode_and, "orr": decode_orr}
-i_ops = {"set": "111"}
 registers = {
     "r0": "000",
     "r1": "001",
@@ -129,14 +139,16 @@ set_re_str = r"(\w+)\s+(\w+)"
 r_re = re.compile(pre + r_re_str + post)
 i_re = re.compile(pre + set_re_str + post)
 label_re = re.compile(pre + r"([_\w]+):" + post)
-decimal = re.compile(r"\d+")
+immediate = re.compile(r"(\d+|0b[01]+)")
+
+pc = 0  # program counter
+branch_counter = 0  # running count of number of branches
 
 # mapping from brach label to pc value
 branches: dict[str, int] = {}
 # values to put in LUT if necessary
+# mapping from branch_count to relative jump size
 lut: dict[int, int] = {}
-pc = 0
-branch_counter = 0
 
 
 def decode(line: str) -> str:
@@ -146,8 +158,7 @@ def decode(line: str) -> str:
 
     if r_match is not None:
         op, r1, r0 = r_match.groups()
-
-        if op == "mov" and decimal.match(r0):
+        if op == "mov" and immediate.match(r0) is not None:
             return decode_mov_imm(r_match)
 
         # expand into native operations
@@ -192,20 +203,45 @@ def decode_i(match: re.Match) -> str:
     global pc
     op, imm_str = match.groups()
     if imm_str.isdigit():
-        # e.g. set 32
-        imm = int(imm_str)
-        if imm < 0 or imm > 63:
-            raise ValueError("Input integer must be between 0 and 63")
+        base = 10
+    elif imm_str.startswith("0b"):
+        base = 2
+    elif imm_str.startswith("0x"):
+        base = 16
+    else:
+        base = None
 
-        bin = format(imm, "06b")
+    if base is not None:
+        imm = int(imm_str, base=base)
+        if imm < 0 or imm > 255:
+            raise ValueError(f"Input integer {imm} must be between 0 and 63")
+        if imm < 64:
+            bin = format(imm, "06b")
+        else:
+            bin = format(imm, "08b")
+            top_5_bits = int(bin[:5], base=2)
+            bot_3_bits = int(bin[5:], base=2)
+            # ex: 1010_1010
+            ops = [
+                f"set {top_5_bits}",  # OUT = 0001_0101
+                f"mov r5, OUT",  # r5 = OUT
+                "set 5",  # OUT = 5
+                "rot r5, OUT",  # OUT = r5 rot 5 = 1010_1000
+                # now we need to do OUT | bottom bits
+                "nand OUT, OUT",  # OUT = ~OUT
+                "mov r5, OUT",  # r5 = OUT
+                f"set {bot_3_bits}",  # OUT = 0000_0010
+                "nand OUT, OUT",  # OUT = ~OUT
+                "nand r5, OUT",  # OUT = ~(r5 & OUT)
+            ]
+            return "".join(decode(op) for op in ops)
+
     else:
         # setting a label
         # e.g. set loop_end
         bin = f"{{{imm_str}}}"
 
-    op_bin = i_ops.get(op)
-    if op_bin is None:
-        raise Exception(f'invalid op "{op}"')
+    op_bin = "111"  # opcode of set
     pc += 1
     return f"{op_bin}{bin}\n"
 
@@ -259,7 +295,6 @@ def process_branch(bin_line: str, pc: int) -> tuple[str, int]:
 
 
 def main():
-    # TODO: implement rot reg, imm
     # TODO: implement set 0b
     global LUT_ENABLED
     LUT_ENABLED = True

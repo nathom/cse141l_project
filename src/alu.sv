@@ -23,7 +23,7 @@ module alu (
       2'b00:  // add no carry
       rslt = inA + inB;
       2'b01:  // right rotate
-      rslt = (inA >> inB) | (inA << (6 - inB));
+      rslt = (inB >> inA) | (inB << (8 - inA));
       2'b10:  // NAND
       rslt = ~(inA & inB);
       2'b11:  // nop, pass B through
