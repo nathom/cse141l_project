@@ -201,7 +201,7 @@ def decode_r(match: re.Match) -> str:
 def decode_i(match: re.Match) -> str:
     """The only I-type instruction is set."""
     global pc
-    op, imm_str = match.groups()
+    _, imm_str = match.groups()
     if imm_str.isdigit():
         base = 10
     elif imm_str.startswith("0b"):
@@ -216,6 +216,7 @@ def decode_i(match: re.Match) -> str:
         if imm < 0 or imm > 255:
             raise ValueError(f"Input integer {imm} must be between 0 and 63")
         if imm < 64:
+            # we can fit it in the 6 bit immediate
             bin = format(imm, "06b")
         else:
             bin = format(imm, "08b")
