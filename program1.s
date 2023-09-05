@@ -108,9 +108,8 @@ ldr r2, OUT        // r2 = mem[OUT] = mem[i+1] R2 now has LSB
 
 
 // output LSW
-/*lsb rrt(4) & 11110000 | p4 rrt(4) & 11110000 | ((lsb & 00000001) rrt(5) & 11111000 | 
-p2 rrt(6) & 11111100 | p1 rrt(7) & 11111110 | p0
-*/
+// lsb rrt(4) & 11110000 | p4 rrt(4) & 11110000 | ((lsb & 00000001) rrt(5) & 11111000 | 
+// p2 rrt(6) & 11111100 | p1 rrt(7) & 11111110 | p0
 
 //TODO fix rotates Blue Bold
 mov r4, 4

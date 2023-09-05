@@ -53,6 +53,7 @@ set imm
 Sets the OUT register to imm, a constant value.
 """
 
+import itertools
 import re
 import sys
 
@@ -75,10 +76,10 @@ def decode_xor(reg1, reg0):
         f"nand OUT, {reg0}",
         f"nand OUT, r5",
     ]
-    return "".join(decode(line) for line in ops)
+    return itertools.chain.from_iterable(decode(line) for line in ops)
 
 
-def decode_mov_imm(match):
+def decode_mov_imm(match) -> list[str]:
     op, reg1, imm = match.groups()
     assert op == "mov"
 
@@ -86,7 +87,8 @@ def decode_mov_imm(match):
         f"set {imm}",
         f"mov {reg1}, out",
     ]
-    return "".join(decode(op) for op in ops)
+
+    return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
 
 def decode_and(reg1, reg0):
@@ -94,7 +96,7 @@ def decode_and(reg1, reg0):
         f"nand {reg1}, {reg0}",
         f"nand OUT, OUT",
     ]
-    return "".join(decode(op) for op in ops)
+    return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
 
 def decode_orr(reg1, reg0):
@@ -104,7 +106,7 @@ def decode_orr(reg1, reg0):
         f"nand {reg0}, {reg0}",
         f"nand r5, OUT",
     ]
-    return "".join(decode(op) for op in ops)
+    return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
 
 r_ops = {
@@ -151,7 +153,7 @@ branches: dict[str, int] = {}
 lut: dict[int, int] = {}
 
 
-def decode(line: str) -> str:
+def decode(line: str) -> list[str]:
     r_match = r_re.match(line)
     i_match = i_re.match(line)
     label_match = label_re.match(line)
@@ -174,14 +176,14 @@ def decode(line: str) -> str:
         if label_name in branches:
             raise Exception(f"Label {label_name} already defined")
         branches[label_name] = pc
-        return ""
+        return []
     else:
         raise Exception(f"No instruction found for {line = }")
 
 
-def decode_r(match: re.Match) -> str:
+def decode_r(match: re.Match) -> list[str]:
     global pc
-    op, reg1, reg0 = map(str.lower, match.groups())
+    op, reg1, reg0 = match.groups()
     op_bin = r_ops.get(op)
     if op_bin is None:
         raise Exception(f'invalid op "{op}"')
@@ -195,10 +197,10 @@ def decode_r(match: re.Match) -> str:
         raise Exception(f'invalid reg "{reg0}"')
 
     pc += 1
-    return f"{op_bin}{reg1_bin}{reg0_bin}\n"
+    return [f"{op_bin}{reg1_bin}{reg0_bin}"]
 
 
-def decode_i(match: re.Match) -> str:
+def decode_i(match: re.Match) -> list[str]:
     """The only I-type instruction is set."""
     global pc
     _, imm_str = match.groups()
@@ -214,11 +216,16 @@ def decode_i(match: re.Match) -> str:
     if base is not None:
         imm = int(imm_str, base=base)
         if imm < 0 or imm > 255:
-            raise ValueError(f"Input integer {imm} must be between 0 and 63")
+            raise ValueError(
+                f"Input integer {imm} must be between 0 and 255 to fit in 8 bit reg"
+            )
         if imm < 64:
             # we can fit it in the 6 bit immediate
             bin = format(imm, "06b")
         else:
+            # 7 to 8 bits
+            # shift in top 5 bits
+            # then orr with bottom 3 bits
             bin = format(imm, "08b")
             top_5_bits = int(bin[:5], base=2)
             bot_3_bits = int(bin[5:], base=2)
@@ -235,16 +242,17 @@ def decode_i(match: re.Match) -> str:
                 "nand OUT, OUT",  # OUT = ~OUT
                 "nand r5, OUT",  # OUT = ~(r5 & OUT)
             ]
-            return "".join(decode(op) for op in ops)
+            return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
     else:
         # setting a label
         # e.g. set loop_end
+        # will be replaced with either rel addr or pc addr in second pass
         bin = f"{{{imm_str}}}"
 
     op_bin = "111"  # opcode of set
     pc += 1
-    return f"{op_bin}{bin}\n"
+    return [f"{op_bin}{bin}\n"]
 
 
 def to_signed_bin(number: int) -> str:
@@ -296,7 +304,6 @@ def process_branch(bin_line: str, pc: int) -> tuple[str, int]:
 
 
 def main():
-    # TODO: implement set 0b
     global LUT_ENABLED
     LUT_ENABLED = True
 
@@ -313,15 +320,20 @@ def main():
 
     out_lines: list[str] = []
     with open(sys.argv[1]) as asm:
-        for line in asm:
-            if line.startswith(("#", "//", ";")) or len(line.strip()) == 0:
+        for i, line in enumerate(asm):
+            _line = line.strip().lower()
+            if _line.startswith(("#", "//", ";")) or len(_line) == 0:
                 continue
-            bin = decode(line)
+            try:
+                bin = decode(_line)
+            except Exception as e:
+                raise Exception(f"Error decoding line {i}: {e}") from e
+
             if not debug:
-                out_lines.extend(bin.split("\n"))
+                out_lines.extend(bin)
             else:
-                out_lines.append(f"# {line.strip()}")
-                out_lines.extend(bin.split("\n"))
+                out_lines.append(f"# {_line}")
+                out_lines.extend(bin)
 
     # remove empty strings
     out_lines = [s for s in out_lines if len(s) > 0]
@@ -345,7 +357,7 @@ always_comb
 {cases}
         default: target = 'b0;  // hold PC  
     endcase
-        """,
+    """,
             file=sys.stderr,
         )
 
