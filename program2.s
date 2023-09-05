@@ -202,7 +202,7 @@ mov r4, 0b00000000
 
 //if --> Beq r4,r3
 set equalParity
-beq r4,r3
+beq r4, r3
 
 //TODO else if (p0 == p0_exp)
 hammingCheck:
@@ -388,6 +388,7 @@ beq r0, r0 ; unconditional branch back up
 equalParity:
 str r2, r0, -30
 str r1, r0, -31
+
 set loop_start
 beq r4, r4
 
