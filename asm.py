@@ -67,6 +67,10 @@ def decode_xor(reg1, reg0) -> list[str]:
     # NAND r0  r1
     # NAND out r1
     # NAND out AI
+    invalid_regs = ("out", "r5")
+    if reg1 in invalid_regs or reg0 in invalid_regs:
+        raise Exception("Cannot use OUT or r5 register with xor")
+
     ops = [
         f"nand {reg1}, {reg0}",
         f"mov r5, out",
@@ -99,7 +103,11 @@ def decode_and(reg1, reg0):
     return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
 
+# Cannot be used if reg0 is OUT
 def decode_orr(reg1, reg0):
+    if reg0 in ("r5", "out") or reg1 == "r5":
+        raise Exception("Second operand cannot be OUT, neither can be r5")
+
     ops = [
         f"nand {reg1}, {reg1}",
         f"mov r5, out",
@@ -252,7 +260,7 @@ def decode_i(match: re.Match) -> list[str]:
 
     op_bin = "111"  # opcode of set
     pc += 1
-    return [f"{op_bin}{bin}\n"]
+    return [f"{op_bin}{bin}"]
 
 
 def to_signed_bin(number: int) -> str:
@@ -327,7 +335,7 @@ def main():
             try:
                 bin = decode(_line)
             except Exception as e:
-                raise Exception(f"Error decoding line {i}: {e}") from e
+                raise Exception(f"Error decoding line {i+1}: {e}") from e
 
             if not debug:
                 out_lines.extend(bin)
