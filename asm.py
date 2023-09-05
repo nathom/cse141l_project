@@ -14,7 +14,7 @@ An assembler for the LEAP architecture.
     are not depending on that.
 
 1 Output register:
-    OUT (111)
+    out (111)
 
     This is where the output of all R type instructions
     are stored, except MOV, which doesn't have an output.
@@ -22,7 +22,7 @@ An assembler for the LEAP architecture.
 1 Parity bit register:
     PAR
 
-    This is always equal to ^OUT.
+    This is always equal to ^out.
 
 R-Type Instructions:
 
@@ -40,7 +40,7 @@ Moves the value in r0 to r1.
 
 xor r1, r0
 
-Sets OUT to the bitwise XOR between r1 and r0. Uses AI register!
+Sets out to the bitwise XOR between r1 and r0. Uses AI register!
 
 rot r1, r0
 
@@ -50,7 +50,7 @@ I-Type Instructions:
 
 set imm
 
-Sets the OUT register to imm, a constant value.
+Sets the out register to imm, a constant value.
 """
 
 import itertools
@@ -59,24 +59,24 @@ import sys
 
 
 # xor reg1, reg0
-def decode_xor(reg1, reg0):
+def decode_xor(reg1, reg0) -> list[str]:
     # NAND r0  r1
-    # MOV  AI  OUT
+    # MOV  AI  out
     # NAND r0  AI
-    # MOV  AI  OUT
+    # MOV  AI  out
     # NAND r0  r1
-    # NAND OUT r1
-    # NAND OUT AI
+    # NAND out r1
+    # NAND out AI
     ops = [
         f"nand {reg1}, {reg0}",
-        f"mov r5, OUT",
+        f"mov r5, out",
         f"nand {reg1}, r5",
-        f"mov r5, OUT",
+        f"mov r5, out",
         f"nand {reg1}, {reg0}",
-        f"nand OUT, {reg0}",
-        f"nand OUT, r5",
+        f"nand out, {reg0}",
+        f"nand out, r5",
     ]
-    return itertools.chain.from_iterable(decode(line) for line in ops)
+    return list(itertools.chain.from_iterable(decode(line) for line in ops))
 
 
 def decode_mov_imm(match) -> list[str]:
@@ -94,7 +94,7 @@ def decode_mov_imm(match) -> list[str]:
 def decode_and(reg1, reg0):
     ops = [
         f"nand {reg1}, {reg0}",
-        f"nand OUT, OUT",
+        f"nand out, out",
     ]
     return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
@@ -102,9 +102,9 @@ def decode_and(reg1, reg0):
 def decode_orr(reg1, reg0):
     ops = [
         f"nand {reg1}, {reg1}",
-        f"mov r5, OUT",
+        f"mov r5, out",
         f"nand {reg0}, {reg0}",
-        f"nand r5, OUT",
+        f"nand r5, out",
     ]
     return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
@@ -231,16 +231,16 @@ def decode_i(match: re.Match) -> list[str]:
             bot_3_bits = int(bin[5:], base=2)
             # ex: 1010_1010
             ops = [
-                f"set {top_5_bits}",  # OUT = 0001_0101
-                f"mov r5, OUT",  # r5 = OUT
-                "set 5",  # OUT = 5
-                "rot r5, OUT",  # OUT = r5 rot 5 = 1010_1000
-                # now we need to do OUT | bottom bits
-                "nand OUT, OUT",  # OUT = ~OUT
-                "mov r5, OUT",  # r5 = OUT
-                f"set {bot_3_bits}",  # OUT = 0000_0010
-                "nand OUT, OUT",  # OUT = ~OUT
-                "nand r5, OUT",  # OUT = ~(r5 & OUT)
+                f"set {top_5_bits}",  # out = 0001_0101
+                f"mov r5, out",  # r5 = out
+                "set 5",  # out = 5
+                "rot r5, out",  # out = r5 rot 5 = 1010_1000
+                # now we need to do out | bottom bits
+                "nand out, out",  # out = ~out
+                "mov r5, out",  # r5 = out
+                f"set {bot_3_bits}",  # out = 0000_0010
+                "nand out, out",  # out = ~out
+                "nand r5, out",  # out = ~(r5 & out)
             ]
             return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
@@ -308,7 +308,7 @@ def main():
     LUT_ENABLED = True
 
     if len(sys.argv) < 2:
-        print(f"Usage: python {sys.argv[0]} INPUT_ASM [OUTPUT_BINARY]")
+        print(f"Usage: python {sys.argv[0]} INPUT_ASM [outPUT_BINARY]")
         return
 
     if len(sys.argv) == 2:
