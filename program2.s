@@ -99,7 +99,7 @@ and r4, r2          // lsb & 0b11110000
 xor OUT, r1         // msb ^ lsb & 11111110
 mov r4, par         // r4 holds p0_exp
 set 5
-rot r4, OUT           // r4 is now 0000_p0exp_000
+rot r4, OUT         // r4 is now 0000_p0exp_000
 mov r4, OUT
 xor r4, r3          // If its the same then the equivalent bit in r3 should be 0
 mov r3, OUT
@@ -200,15 +200,21 @@ mov r1, OUT         // r1 now holds hout
 // Registers we can touch r4, r5, OUT
 mov r4, 0b00000000
 
-// TODO if --> Beq r4,r3 STARTS AT LINE 32
-set 
+//if --> Beq r4,r3
+set equalParity
 beq r4,r3
 
-str r2, r0, -30
-str r1, r0, -31
-
-
 //TODO else if (p0 == p0_exp)
+hammingCheck:
+set 3           
+rot r3, OUT         //Rotating parity comparison by 3
+mov r4, OUT
+set 0b00000001      //Isolating the p0_exp bit
+and r4, OUT     
+mov r4, OUT         //r4 holds p0_exp
+mov r5, 0b00000000
+set p0exp_loop
+beq r4, r5
 
 //TODO else
 mov r4, 0b00000000          //Int hamming = 0;
@@ -378,5 +384,22 @@ str r4, OUT ; mem[i+1] = r4
 
 set loop_start
 beq r0, r0 ; unconditional branch back up
+
+equalParity:
+str r2, r0, -30
+str r1, r0, -31
+set loop_start
+beq r4, r4
+
+p0exp_loop:
+mov r4, 0b10000000
+set 1
+add r0, OUT
+str r4, OUT
+
+set loop_start
+beq r0, r0 ; unconditional branch back up
+
+
 loop_end:
 mov r0, r0
