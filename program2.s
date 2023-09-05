@@ -1,13 +1,11 @@
 // TODO update to include LSB AND MSB
-/*
-r0 - counter
-r1 - MSB
-r2 - LSB
-r3 - Parity
-r5 - Immediate register for XOR
+# r0 - counter
+# r1 - MSB
+# r2 - LSB
+# r3 - Parity
+# r5 - Immediate register for XOR
 
-IMPORTANT NOTE - For r3, the format is going to be the XOR of p0 and the expected
- */
+# IMPORTANT NOTE - For r3, the format is going to be the XOR of p0 and the expected
 mov r0, 0   // set r0 = i = 0
 loop_start:
 mov r4, 32
@@ -353,14 +351,13 @@ and r2, OUT
 orr r4, OUT         
 mov r4, OUT         //r4 now has final lout
 
-/* So quick recap
-r0 is your counter, do not touch
-r2 holds garbage data (previously lsb_out), will now hold hout
-r1 holds msb_out
-r3 holds garbage data (previously parity bits)
-r4 holds lout
-r5 is the tempoarary XOR register
- */
+# So quick recap
+# r0 is your counter, do not touch
+# r2 holds garbage data (previously lsb_out), will now hold hout
+# r1 holds msb_out
+# r3 holds garbage data (previously parity bits)
+# r4 holds lout
+# r5 is the tempoarary XOR register
 
  //Using r1 for hout
  mov r1, 0b00000000

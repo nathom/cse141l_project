@@ -214,11 +214,16 @@ def decode_i(match: re.Match) -> str:
     if base is not None:
         imm = int(imm_str, base=base)
         if imm < 0 or imm > 255:
-            raise ValueError(f"Input integer {imm} must be between 0 and 63")
+            raise ValueError(
+                f"Input integer {imm} must be between 0 and 255 to fit in 8 bit reg"
+            )
         if imm < 64:
             # we can fit it in the 6 bit immediate
             bin = format(imm, "06b")
         else:
+            # 7 to 8 bits
+            # shift in top 5 bits
+            # then orr with bottom 3 bits
             bin = format(imm, "08b")
             top_5_bits = int(bin[:5], base=2)
             bot_3_bits = int(bin[5:], base=2)
@@ -313,14 +318,19 @@ def main():
 
     out_lines: list[str] = []
     with open(sys.argv[1]) as asm:
-        for line in asm:
-            if line.startswith(("#", "//", ";")) or len(line.strip()) == 0:
+        for i, line in enumerate(asm):
+            _line = line.strip().lower()
+            if _line.startswith(("#", "//", ";")) or len(_line) == 0:
                 continue
-            bin = decode(line)
+            try:
+                bin = decode(_line)
+            except Exception as e:
+                raise Exception(f"Error decoding line {i}: {e}") from e
+
             if not debug:
                 out_lines.extend(bin.split("\n"))
             else:
-                out_lines.append(f"# {line.strip()}")
+                out_lines.append(f"# {_line}")
                 out_lines.extend(bin.split("\n"))
 
     # remove empty strings
