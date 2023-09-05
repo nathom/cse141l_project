@@ -53,6 +53,7 @@ set imm
 Sets the OUT register to imm, a constant value.
 """
 
+import itertools
 import re
 import sys
 
@@ -75,7 +76,7 @@ def decode_xor(reg1, reg0):
         f"nand OUT, {reg0}",
         f"nand OUT, r5",
     ]
-    return [decode(line) for line in ops]
+    return itertools.chain.from_iterable(decode(line) for line in ops)
 
 
 def decode_mov_imm(match) -> list[str]:
@@ -86,8 +87,8 @@ def decode_mov_imm(match) -> list[str]:
         f"set {imm}",
         f"mov {reg1}, out",
     ]
-    code = [decode(op) for op in ops]
-    return [line for c in code for line in c]
+
+    return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
 
 def decode_and(reg1, reg0):
@@ -95,8 +96,7 @@ def decode_and(reg1, reg0):
         f"nand {reg1}, {reg0}",
         f"nand OUT, OUT",
     ]
-    code = [decode(op) for op in ops]
-    return [line for c in code for line in c]
+    return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
 
 def decode_orr(reg1, reg0):
@@ -106,8 +106,7 @@ def decode_orr(reg1, reg0):
         f"nand {reg0}, {reg0}",
         f"nand r5, OUT",
     ]
-    code = [decode(op) for op in ops]
-    return [line for c in code for line in c]
+    return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
 
 r_ops = {
@@ -243,8 +242,7 @@ def decode_i(match: re.Match) -> list[str]:
                 "nand OUT, OUT",  # OUT = ~OUT
                 "nand r5, OUT",  # OUT = ~(r5 & OUT)
             ]
-            code = [decode(op) for op in ops]
-            return [line for c in code for line in c]
+            return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
     else:
         # setting a label
