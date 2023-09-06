@@ -30,13 +30,19 @@ logic[ 3:0] err;                 // bitwise XOR of p* and s* as 4-bit vector
 logic[11:1] d2_corr[15];         // recovered and corrected messages
 bit  [15:0] score2, case2;
 
-// your device goes here
-// explicitly list ports if your names differ from test bench's
-top_level DUT(.clk, .start, .done);	 // replace "top_level" with the name of your top level module
+  top_level DUT (
+      .clk  (clk),
+      .reset(reset),
+      .done (done)
+  );  // replace "proc" with the name of your top level module
 
 initial begin
 // generate parity from random 11-bit messages 
+
   for(int i=0; i<15; i++) begin
+  $monitor("%d:: registers: r0: %b, r1: %b, r2: %b, r3: %b, r4: %b, r5: %b, r6: %b, out: %b",
+             DUT.prog_ctr, DUT.rf1.core[0], DUT.rf1.core[1], DUT.rf1.core[2], DUT.rf1.core[3],
+             DUT.rf1.core[4], DUT.rf1.core[5], DUT.rf1.core[6], DUT.rf1.core[7]);
 	d2_in[i] = $random;
     p8 = ^d2_in[i][11:5];
     p4 = (^d2_in[i][11:8])^(^d2_in[i][4:2]); 
