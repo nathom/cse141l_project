@@ -1,20 +1,20 @@
 
-# r0 - holds index i
-# r1 - general use
-# r2 - holds variable “count”
-# r3 - holds variable byte_count
-# r4 - holds variable totalCount
-# OUT - default output register
+// r0 - holds index i
+// r1 - general use
+// r2 - holds variable “count”
+// r3 - holds variable byte_count
+// r4 - holds variable totalCount
+// OUT - default output register
 
 // Initialize variables
-mov r0, 0 // int i = 0
+mov r0, 0                // int i = 0
 mov r1, 32
-mov r2, 0 // count = 0
-mov r3, 0 // byte_count = 0
+mov r2, 0                // count = 0
+mov r3, 0                // byte_count = 0
 
 // For loop 
 set loop_end
-beq r0, r1 //  Stop when r0(i) = r1(32)
+beq r0, r1               //  Stop when r0(i) = r1(32)
 
 // parts a and b
 // If ((b & (1111_1000)) == pattern) {count++; occurred = 1}
@@ -27,14 +27,17 @@ set if1
 beq OUT, r1             // b & (1111_1000) == pattern               
 
 if1:
+mov r0, r0
 set 1                   // OUT = 1
 add r2, OUT             // OUT = r2 + 1
 mov r2, OUT             // count++
 mov r1, 1               // r1 = occurred = 1 (Remember to return r1 to 32 for the for loop)
- 
+
 set if2
 beq r1, 1               // If (occurred) byte_count++;
+
 if2:
+mov r0, r0
 add r3, 1               // OUT = r3 + 1
 mov r3, OUT             // byte_count++
 
@@ -68,17 +71,18 @@ set if4
 beq OUT, r1             // ((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b00000001) == pattern)
 
 if4:
+mov r0, r0
 set 1                   // OUT = 1
 add r4, OUT             // OUT = r4 + 1
 mov r4, OUT             // r4 = r4 + 1 = totalCount++
 
-// If(((b & 0000_0111) << 2) | (mem[i + 1] rrt(6) & 0b00000011) == pattern)
+// Fourth if statement
 // (mem[i + 1] rrt(7) & 0b00000001)
 set 1
 add r0, OUT             // OUT = i + 1
-ldr r1, r0              // r1 = mem[OUT] = mem[i+1]
+ldr r1, OUT             // r1 = mem[OUT] = mem[i+1]
 set 6                   // OUT = 6
-rot r1, OUT                                   // DONE
+rot r1, OUT            wwwwwwwwwwwww                       
 set 0b00000011
 and r1, OUT             // OUT = C = (mem[i + 1] rrt(6) & 0b00000011)
 mov r1, OUT             // r1 holds OUT for later OR 
@@ -100,15 +104,16 @@ beq OUT, r1             // (((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b0000
 
 // Increment totalCount
 if5:
+mov r0, r0
 set 1                   // OUT = 1
 add r4, OUT             // OUT = r4 + 1
 mov r4, OUT             // r4 = r4 + 1 = totalCount++
 
-// If(((b & 0000_0011) << 3) | (mem[i + 1] rrt(5) & 0b00000111) == pattern)
+// Fifth if statement
 // (mem[i + 1] rrt(5) & 0b00000111)
 set 1
 add r0, OUT             // OUT = i + 1
-ldr r1, r0              // r1 = mem[OUT] = mem[i+1]
+ldr r1, OUT             // r1 = mem[OUT] = mem[i+1]
 set 5                   // OUT = 5
 rot r1, OUT                                        
 set 0b00000111
@@ -132,11 +137,12 @@ beq OUT, r1             // (((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b0000
 
 // Increment totalCount
 if6:
+mov r0, r0
 set 1                   // OUT = 1
 add r4, OUT             // OUT = r4 + 1
 mov r4, OUT             // r4 = r4 + 1 = totalCount++
 
-// (((b & 0000_0001) << 4) | (mem[i + 1] rrt(4) & 0b00001111) == pattern)
+// Sixth if statement
 // (mem[i + 1] rrt(4) & 0b00001111)
 set 1
 add r0, OUT             // OUT = i + 1
@@ -164,11 +170,13 @@ beq OUT, r1             // (((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b0000
 
 // Increment totalCount
 if7:
+mov r0, r0
 set 1                   // OUT = 1
 add r4, OUT             // OUT = r4 + 1
 mov r4, OUT             // r4 = r4 + 1 = totalCount++
 
 if3:
+mov r0, r0
 add r4 r2               // OUT = totalCount + count           
 mov r4, OUT             // totalCount = totalCount + count
 
