@@ -13,7 +13,6 @@ set loop_end
 beq r0, r4
 
 // r1 = msb, r2 = lsb
-set 30
 add r0, OUT // OUT = i + 30
 ldr r1, OUT          // r1 = mem[i + 30] replaces MSB
 set 31
@@ -386,9 +385,10 @@ set loop_start
 beq r0, r0 ; unconditional branch back up
 
 equalParity:
-str r2, r0, -30
-str r1, r0, -31
-
+str r2, r0
+mov r4, 1
+add r0, r4
+str r1, OUT
 set loop_start
 beq r4, r4
 
