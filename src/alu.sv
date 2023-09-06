@@ -17,7 +17,6 @@ module alu (
     rslt = 'b0;
     // sc_o = 'b0;
     // zero = rslt == 0;
-    pari = ^rslt;
     eq  = inA == inB;
     case (alu_cmd)
       2'b00:  // add no carry
@@ -29,6 +28,7 @@ module alu (
       2'b11:  // nop, pass B through
       rslt = inB;
     endcase
+    pari = ^rslt;
   end
 
 endmodule

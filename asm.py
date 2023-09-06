@@ -73,13 +73,14 @@ def decode_xor(reg1, reg0) -> list[str]:
 
     ops = [
         f"nand {reg1}, {reg0}",
-        f"mov r5, out",
+        f"mov r5, out",  # r5 = A nand B
         f"nand {reg1}, r5",
-        f"mov r5, out",
-        f"nand {reg1}, {reg0}",
-        f"nand out, {reg0}",
+        f"mov r5, out",  # r5 = B nand (A nand B)
+        f"nand {reg1}, {reg0}",  # out = A nand B
+        f"nand out, {reg0}",  # out = A nand (A nand B)
         f"nand out, r5",
     ]
+
     return list(itertools.chain.from_iterable(decode(line) for line in ops))
 
 
@@ -349,6 +350,8 @@ def main():
     curr_pc = 0
     for line in out_lines:
         newline, curr_pc = process_branch(line, curr_pc)
+        if debug and not newline.startswith("#"):
+            newline = f"{curr_pc}: {newline}"
         final_lines.append(newline)
 
     outfile.write("\n".join(final_lines))
@@ -365,6 +368,9 @@ always_comb
 {cases}
         default: target = 'b0;  // hold PC  
     endcase
+
+There are {curr_pc+1} instructions. Ensure
+the done flag is not raised before pc hits {curr_pc+1}.
     """,
             file=sys.stderr,
         )
