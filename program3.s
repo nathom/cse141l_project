@@ -34,7 +34,7 @@ mov r2, OUT             // count++
 mov r1, 1               // r1 = occurred = 1 (Remember to return r1 to 32 for the for loop)
 
 set if2
-beq r1, 1               // If (occurred) byte_count++;
+beq r1, 1               // If (occurred) byte_count++
 
 if2:
 mov r0, r0
@@ -82,7 +82,7 @@ set 1
 add r0, OUT             // OUT = i + 1
 ldr r1, OUT             // r1 = mem[OUT] = mem[i+1]
 set 6                   // OUT = 6
-rot r1, OUT            wwwwwwwwwwwww                       
+rot r1, OUT                                  
 set 0b00000011
 and r1, OUT             // OUT = C = (mem[i + 1] rrt(6) & 0b00000011)
 mov r1, OUT             // r1 holds OUT for later OR 
