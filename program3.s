@@ -1,14 +1,14 @@
 /*
 r0 - holds index i
-r1 -
+r1 - general use
 r2 - holds variable “count”
 r3 - holds variable byte_count
-r4 - holds variable b
+r4 - holds variable totalCount
 OUT - default output register
 */
 
-// TODO: Fix all "rot rX, #", fix syntax error "=mem" 
 
+// IDEA: Use r4 for totalcount and get b by ldr(ing) [i] into r1 for b
 
 // Initialize variables
 ; Char mem[32]; 
@@ -20,15 +20,15 @@ mov r3, 0 // byte_count = 0
 // For loop 
 set Loop_end
 beq r0, r1 //  Stop when r0(i) = r1(32)
-ldr r1, r0 // r1 = mem[i]
-mov r4, r1 // b = mem[i]
-mov r1, 1
-add r0, r1 // r1 can be used after assigning b (OUT = increment i by 1)
-mov r0, OUT // i is incremented for next loop (r0 = i + 1)
+// rather than ldr mem[i] into r4 and keep r4, will just call mem[i] when needed
+// ldr r1, r0 // r1 = mem[i]
+// mov r4, r1 // b = mem[i]
+
+// r4 can now be used for totalCount
 
 // parts a and b
 // If ((b & (1111_1000)) == pattern) {count++; occurred = 1}
-mov r3, 0b1111_1000 // byte_count not needed for 1st If, can use r3
+mov r3, 0b11111000 // byte_count not needed for 1st If, can use r3
 and r4, r3  // OUT = b & (1111_1000)
 
 mov r5, 32
@@ -50,107 +50,140 @@ mov r1, 0 // totalCount = 0
 set if3
 beq r0, 31    // if(i != 31) 
 
-
-
-(TODO) // If(((b & 0000_1111) << 1)...)
-set OUT, 1
+// If(((b & 0000_1111) << 1) |(mem[i + 1] rrt(7) & 0b00000001) == pattern)
+set 1
 add r0, OUT // OUT = i + 1
 ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
 set 7 // OUT = 7
-rot r1, OUT // rot r1, 7
-set OUT, 0b00000001
+rot r1, OUT // mem[i + 1] rrt(7)
+set 0b00000001
 and r1, OUT // OUT = C = (mem[i + 1] rrt(7) & 0b00000001) 
-mov r1, OUT // r1 holds OUT for later OR
+mov r1, OUT // (mem[i + 1] rrt(7) & 0b00000001)
 
-mov r5, 0b00001111 
-and r4, r5 // OUT = (b & 0b00001111)
+// (b & 0000_1111) << 1
+ldr r5, r0 // b = mem[i]
+set 0b00001111
+and r5, OUT // OUT = b & 0b00001111
 mov r5, 7
-rot OUT, r5 // OUT = B = (b & 0b00001111) << 1         // DONE
-or r1, OUT // OUT = OUT | r1
-mov r1 OUT // r1 = B | C
+rot OUT, r5 // OUT = (b & 0000_1111) << 1
+
+or OUT, r1 // OUT = (((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b00000001)
 
 mov r5, 32
-ldr r1, r5 // r1 = pattern = mem[32]
+ldr r1, r5
 set if4
-beq OUT, r1 // LHS == pattern                // DONE
+beq OUT, r1 // ((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b00000001) == pattern)
 
 if4:
-add rX, rY// totalcount++       // TODO: How to increment totalcount? Need another register
+set 1 // OUT = 1
+add r4, OUT // OUT = r4 + 1
+mov r4, OUT // r4 = r4 + 1 = totalCount++
 
-(TODO) // If(((b & 0000_0111) << 2)...)
-set OUT, 1
+// If(((b & 0000_0111) << 2) | (mem[i + 1] rrt(6) & 0b00000011) == pattern)
+// (mem[i + 1] rrt(7) & 0b00000001)
+set 1
 add r0, OUT // OUT = i + 1
 ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
 set 6 // OUT = 6
 rot r1, OUT                                   // DONE
-set OUT, 0b00000011
+set 0b00000011
 and r1, OUT // OUT = C = (mem[i + 1] rrt(6) & 0b00000011)
 mov r1, OUT // r1 holds OUT for later OR 
 
-mov r5, 0b00000111 
-and r4, r5 // OUT = (b & 0b00000111)
-mov r5 6
-rot OUT, r5 // OUT = B = (b & 0b00000111) << 2  // DONE
-or OUT, r1 // OUT = (B|C)
+// ((b & 0000_0111) << 2)
+ldr r5, r0 // b = mem[i]
+set 0b00000111
+and r5, OUT // OUT = b & 0b00000111
+mov r5, 6
+rot OUT, r5 // OUT = ((b & 0000_0111) << 2)
+
+// ((b & 0000_0111) << 2) | (mem[i + 1] rrt(6) & 0b00000011)
+or OUT, r1
 
 mov r5, 32
-ldr r1, r5 // r1 = pattern = mem[32]
+ldr r1, r5
 set if5
-beq OUT, r1 // (B|C) == pattern                // DONE
+beq OUT, r1 // (((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b00000001) == pattern)
 
+// Increment totalCount
 if5:
-add rX, rY // totalcount++                        TODO: How to increment totalcount? Need another register
+set 1 // OUT = 1
+add r4, OUT // OUT = r4 + 1
+mov r4, OUT // r4 = r4 + 1 = totalCount++
 
-(TODO) // If(((b & 0000_0011) << 3)...)
-set OUT, 1
+// If(((b & 0000_0011) << 3) | (mem[i + 1] rrt(5) & 0b00000111) == pattern)
+// (mem[i + 1] rrt(5) & 0b00000111)
+set 1
 add r0, OUT // OUT = i + 1
 ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
 set 5 // OUT = 5
 rot r1, OUT                                         // DONE
-set OUT, 0b00000111
-and r1, OUT // Out = C = (mem[i + 1] rrt(5) & 0b00000111) 
-mov r1, OUT // r1 holds OUT for later OR
+set 0b00000111
+and r1, OUT // OUT = C = (mem[i + 1] rrt(5) & 0b00000111) 
+mov r1, OUT // r1 = mem[i + 1] rrt(5) & 0b00000111
 
-mov r5, 0b00000011
-and r4, r5 // OUT = b & 0b00000011
+// ((b & 0000_0011) << 3)
+ldr r5, r0
+set  0b00000011
+and r5, OUT // OUT = (b & 0000_0011)
 mov r5, 5
-rot OUT, r5 // OUT = B =(b & 0b00000011) << 3                 // DONE
-or OUT, r1 // OUT = (B|C) 
+rot OUT, r5 // OUT = (b & 0b00000011) << 3
+
+//((b & 0000_0011) << 3) | (mem[i + 1] rrt(5) & 0b00000111)
+or OUT, r1
 
 mov r5, 32
 ldr r1, r5 // r1 = pattern = mem[32]
 set if6
-beq OUT, r1 // (B|C) == pattern
+beq OUT, r1 // (((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b00000001) == pattern)
 
+// Increment totalCount
 if6:
-add rX, rY // totalcount++     TODO: How to increment totalcount? Need another register 
+set 1 // OUT = 1
+add r4, OUT // OUT = r4 + 1
+mov r4, OUT // r4 = r4 + 1 = totalCount++
 
-(TODO) // If(((b & 0000_0001) << 4)...)
-mov OUT, 1
+(TODO) // (((b & 0000_0001) << 4) | (mem[i + 1] rrt(4) & 0b00001111) == pattern)
+// (mem[i + 1] rrt(4) & 0b00001111)
+set 1
 add r0, OUT // OUT = i + 1
 ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
 set 4 // OUT = 4
 rot r1, OUT                                        // DONE
-set OUT, 0b00001111
-and r1, OUT // Out = C = (mem[i + 1] rrt(4) & 0b00001111)
-mov r1, OUT // r1 holds OUT for later OR
+set 0b00001111
+and r1, OUT // OUT = C = (mem[i + 1] rrt(4) & 0b00001111)
+mov r1, OUT // r1 = mem[i + 1] rrt(4) & 0b00001111
 
-mov r5, 0000_0001
-and r4, r5 // OUT = b & 0000_0001
+// (b & 0000_0001) << 4
+ldr r5, r0
+set 0b00000001
+and r5, OUT // OUT = b & 0000_0001
 mov r5, 4
-rot OUT, r5 // OUT = B = (b & 0000_0001) << 4            // DONE
-or OUT, r1 // OUT = (B|C)
+rot OUT, r5 // (b & 0000_0001) << 4
+
+// ((b & 0000_0001) << 4) | (mem[i + 1] rrt(4) & 0b00001111)
+or OUT, r1
 
 mov r5, 32
 ldr r1, r5 // r1 = pattern = mem[32]
 set if7
-beq OUT, r1 // (B|C) == pattern             // DONE
+beq OUT, r1 // (((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b00000001) == pattern)
 
+// Increment totalCount
 if7:
-add rX, rY// totalcount++
+set 1 // OUT = 1
+add r4, OUT // OUT = r4 + 1
+mov r4, OUT // r4 = r4 + 1 = totalCount++
 
 if3:
-add rX r2// totalCount += count             TODO: How to increment totalcount? Need another register
+add r4 r2 // OUT = totalCount + count           
+mov r4, OUT // totalCount = totalCount + count
 
+// increment r0 by 1 for next loop
+mov r1, 1
+add r0, r1 // r1 can be used after assigning b (OUT = increment i by 1)
+mov r0, OUT // i is incremented for next loop (r0 = i + 1)
 mov r1, 1 // Return r1 to 32 for for loop
+
 loop_end:
+mov r0, r0
