@@ -20,11 +20,11 @@ mov r3, 0 // byte_count = 0
 // For loop 
 set Loop_end
 beq r0, r1 //  Stop when r0(i) = r1(32)
+// rather than ldr mem[i] into r4 and keep r4, will just call mem[i] when needed
 // ldr r1, r0 // r1 = mem[i]
 // mov r4, r1 // b = mem[i]
 
 // r4 can now be used for totalcount
-
 
 // parts a and b
 // If ((b & (1111_1000)) == pattern) {count++; occurred = 1}
