@@ -1,10 +1,10 @@
 
-// r0 - holds index i
-// r1 - general use
-// r2 - holds variable “count”
-// r3 - holds variable byte_count
-// r4 - holds variable totalCount
-// OUT - default output register
+# r0 - holds index i
+# r1 - general use
+# r2 - holds variable “count”
+# r3 - holds variable byte_count
+# r4 - holds variable totalCount
+# OUT - default output register
 
 // Initialize variables
 mov r0, 0 // int i = 0
@@ -31,7 +31,7 @@ set 1                   // OUT = 1
 add r2, OUT             // OUT = r2 + 1
 mov r2, OUT             // count++
 mov r1, 1               // r1 = occurred = 1 (Remember to return r1 to 32 for the for loop)
-
+ 
 set if2
 beq r1, 1               // If (occurred) byte_count++;
 if2:
