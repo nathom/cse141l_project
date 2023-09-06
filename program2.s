@@ -8,6 +8,7 @@
 # IMPORTANT NOTE - For r3, the format is going to be the XOR of p0 and the expected
 mov r0, 0   // set r0 = i = 0
 loop_start:
+mov r0, r0
 mov r4, 32
 set loop_end
 beq r0, r4
@@ -222,6 +223,7 @@ beq r4, r3
 
 //TODO else if (p0 == p0_exp)
 hammingCheck:
+mov r0, r0
 set 3           
 rot r3, OUT         //Rotating parity comparison by 3
 mov r4, OUT
@@ -252,6 +254,7 @@ mov r4, OUT
 
 //Checking p4 bit
 parityfour:
+mov r0, r0
 set 6
 rot r3, OUT
 mov r1, OUT
@@ -266,6 +269,7 @@ mov r4, OUT
 
 //Checking p2 bit
 paritytwo:
+mov r0, r0
 set 5
 rot r3, OUT
 mov r1, OUT
@@ -280,6 +284,7 @@ mov r4, OUT
 
 //Checking p1 bit
 parityone:
+mov r0, r0
 set 4
 rot r3, OUT
 mov r1, OUT
@@ -295,7 +300,7 @@ mov r4, OUT         //r4 now holds hamming total
 //From here on out we don't need the parity bits until the next cycle
 //They will be recalculated anyways so i'm using it here
 lsb_out_set:
-
+mov r0, r0
 // r1 for msb, r2 for lsb
 ldr r1, r0          // r1 = mem[i] replaces MSB
 mov r2, 1
@@ -323,6 +328,7 @@ beq r1, r1          //unconditional branch to end of if statement
 
 //r1 = msb_out ; r2 = lsb_out
 lt_eight:
+mov r0, r0
 //Case LT Eight
 nand r4, r4         //OUT = flipped bits of hamming
 mov r4, 0b00000001
@@ -339,6 +345,7 @@ mov r2, OUT
 
 //r1 = msb_out ; r2 = lsb_out
 end_if_else:
+mov r0, r0
 mov r4, 0b00000000
 set 3
 rot r2, OUT
@@ -404,6 +411,7 @@ set loop_start
 beq r0, r0 ; unconditional branch back up
 
 equalParity:
+mov r0, r0
 str r2, r0
 mov r4, 1
 add r0, r4
@@ -412,6 +420,7 @@ set loop_start
 beq r4, r4
 
 p0exp_loop:
+mov r0, r0
 mov r4, 0b10000000
 set 1
 add r0, OUT
