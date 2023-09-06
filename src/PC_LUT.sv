@@ -7,10 +7,13 @@ module PC_LUT #(
 
   always_comb
     case (addr)
-      0: target = 8;
-      1: target = -6;
+      0: target = 259;
+      1: target = -259;
       default: target = 'b0;  // hold PC
     endcase
+
+
+
 
 
 endmodule
