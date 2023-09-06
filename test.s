@@ -1,6 +1,4 @@
 # Works
-set 3
-mov r0, OUT
-set 4
-mov r1, OUT
-add r0, r1
+rot r1, OUT
+and r2, r4         // OUT = lsb rrt(4) & 11110000
+

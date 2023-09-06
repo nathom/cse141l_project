@@ -127,6 +127,6 @@ module top_level (
     else if (sc_en) sc_in <= sc_o;
   end
 
-  assign done = prog_ctr == 128;
+  assign done = prog_ctr == 512;
 
 endmodule
