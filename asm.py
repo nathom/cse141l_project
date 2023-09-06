@@ -67,9 +67,9 @@ def decode_xor(reg1, reg0) -> list[str]:
     # NAND r0  r1
     # NAND out r1
     # NAND out AI
-    invalid_regs = ("out", "r5")
+    invalid_regs = ("out", "r5", "par")
     if reg1 in invalid_regs or reg0 in invalid_regs:
-        raise Exception("Cannot use OUT or r5 register with xor")
+        raise Exception("Cannot use out, r5, or par registers with xor")
 
     ops = [
         f"nand {reg1}, {reg0}",
@@ -78,7 +78,7 @@ def decode_xor(reg1, reg0) -> list[str]:
         f"mov r5, out",  # r5 = B nand (A nand B)
         f"nand {reg1}, {reg0}",  # out = A nand B
         f"nand out, {reg0}",  # out = A nand (A nand B)
-        f"nand out, r5",
+        f"nand out, r5",  # out = (A nand (A nand B)) nand (B nand (A nand B))
     ]
 
     return list(itertools.chain.from_iterable(decode(line) for line in ops))
@@ -106,8 +106,10 @@ def decode_and(reg1, reg0):
 
 # Cannot be used if reg0 is OUT
 def decode_orr(reg1, reg0):
-    if reg0 in ("r5", "out") or reg1 == "r5":
-        raise Exception("Second operand cannot be OUT, neither can be r5")
+    if reg0 in ("r5", "out", "par") or reg1 == "r5":
+        raise Exception(
+            "Second operand cannot be out or par. Both first and second cannot be r5."
+        )
 
     ops = [
         f"nand {reg1}, {reg1}",
