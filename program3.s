@@ -24,7 +24,7 @@ beq r0, r1 //  Stop when r0(i) = r1(32)
 // ldr r1, r0 // r1 = mem[i]
 // mov r4, r1 // b = mem[i]
 
-// r4 can now be used for totalcount
+// r4 can now be used for totalCount
 
 // parts a and b
 // If ((b & (1111_1000)) == pattern) {count++; occurred = 1}
@@ -60,12 +60,12 @@ set 0b00000001
 and r1, OUT // OUT = C = (mem[i + 1] rrt(7) & 0b00000001) 
 mov r1, OUT // (mem[i + 1] rrt(7) & 0b00000001)
 
-// (b & 0000_1111) << 1)
+// (b & 0000_1111) << 1
 ldr r5, r0 // b = mem[i]
 set 0b00001111
 and r5, OUT // OUT = b & 0b00001111
 mov r5, 7
-rot OUT, r5 // OUT = (b & 0000_1111) << 1)
+rot OUT, r5 // OUT = (b & 0000_1111) << 1
 
 or OUT, r1 // OUT = (((b & 0000_1111) << 1) | (mem[i + 1] rrt(7) & 0b00000001)
 
@@ -119,7 +119,7 @@ ldr r1, r0 // r1 = mem[OUT] = mem[i+1]
 set 5 // OUT = 5
 rot r1, OUT                                         // DONE
 set 0b00000111
-and r1, OUT // Out = C = (mem[i + 1] rrt(5) & 0b00000111) 
+and r1, OUT // OUT = C = (mem[i + 1] rrt(5) & 0b00000111) 
 mov r1, OUT // r1 = mem[i + 1] rrt(5) & 0b00000111
 
 // ((b & 0000_0011) << 3)
@@ -184,4 +184,6 @@ mov r1, 1
 add r0, r1 // r1 can be used after assigning b (OUT = increment i by 1)
 mov r0, OUT // i is incremented for next loop (r0 = i + 1)
 mov r1, 1 // Return r1 to 32 for for loop
+
 loop_end:
+mov r0, r0
