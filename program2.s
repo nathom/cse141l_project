@@ -95,34 +95,40 @@ mov r3, OUT
 
 // p0_exp
 mov r4, 0b11111110
-and r4, r2          // lsb & 0b11110000
+and r4, r2         // OUT = lsb & 0b11110000
 mov r4, OUT
 xor r4, r1         // msb ^ lsb & 11111110
-mov r4, par         // r4 holds p0_exp
+mov r4, par        // r4 holds p0_exp
 set 5
 rot r4, OUT         // r4 is now 0000_p0exp_000
 mov r4, OUT
 xor r4, r3          // If its the same then the equivalent bit in r3 should be 0
 mov r3, OUT
+//parity(msb) ^ parity(lsb & 11111110);
 
 // TODO p1_exp
 mov r4, 0b10101010
-and r4, r1          // msb & 0b10101010
+and r4, r1          // OUT = msb & 0b10101010
 mov r4, OUT         // stores in r4
-set 0b10101000 // temporarily storing in output register
+set 0b10101000      // temporarily storing in output register
 and OUT, r2         // lsb & 0b10101000
 mov r1, OUT
-xor r1, r4         // (msb & 0b10101010) ^ (lsb & 0b10101000)
+xor r1, r4          // (msb & 0b10101010) ^ (lsb & 0b10101000)
 mov r4, par         // r4 now holds p1_exp
 set 4
-rot r4, OUT           // p1_exp in proper bit position
+rot r4, OUT         // p1_exp in proper bit position
 mov r4, OUT
 xor r4, r3          // Xor just the p1 bit position
+mov r4, OUT         
+set 0b00010000      
+and OUT, r4         //Mask to get ONLY p1
+orr OUT, p3         //Inserts into p3
 mov r3, OUT
 //Returns r1 to initial state since we needed it for a temp reg
 set 30
 add r0, OUT // OUT = i + 30
 ldr r1, OUT // r1 = mem[i + 30] replaces MSB
+//parity(msb & 0b10101010) ^ parity(lsb & 0b10101000);
 
 // TODO p2_exp
 mov r4, 0b11001100
@@ -131,12 +137,16 @@ mov r4, OUT         // stores in r4
 set 0b11001000 // temporarily storing in output register
 and OUT, r2         // lsb & 0b11001000
 mov r1, OUT
-xor r1, r4         // (msb & 0b11001100) ^ (lsb & 0b11001000)
+xor r1, r4          // (msb & 0b11001100) ^ (lsb & 0b11001000)
 mov r4, par         // r4 now holds p2_exp
 set 3
-rot r4, OUT           // p2_exp in proper bit position
+rot r4, OUT         // p2_exp in proper bit position
 mov r4, OUT
 xor r4, r3          // Xor just the p2 bit position
+mov r4, OUT         
+set 0b00100000      
+and OUT, r4         //Mask to get ONLY p2
+orr OUT, p3         //Inserts into p3
 mov r3, OUT
 
 //Replaces r1 back to original
@@ -159,6 +169,10 @@ set 2
 rot r4, OUT
 mov r4, OUT
 xor r4, r3          // Xor just the p4 bit position
+mov r4, OUT         
+set 0b01000000      
+and OUT, r4         //Mask to get ONLY p4
+orr OUT, p3         //Inserts into p3
 mov r3, OUT
 //Replaces r1 again
 set 30
@@ -175,6 +189,10 @@ set 1
 rot r4, OUT           // p8 in proper bit position
 mov r4, OUT
 xor r4, r3          // Xor just the p8 bit position
+mov r4, OUT         
+set 0b10000000      
+and OUT, r4         //Mask to get ONLY p8
+orr OUT, p3         //Inserts into p3
 mov r3, OUT
 
 // Idk if its smart to set something to zero here but i'm going to do it anyways
