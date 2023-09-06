@@ -6,7 +6,7 @@ mov r0, 0    // set r0 = 0
 mov r1, 30
 
 loop_start:
-
+mov r0, r0 ; nop
 # break if i == 32
 mov r1, 32
 set loop_end
@@ -51,13 +51,14 @@ mov r3, OUT ; r3 = p8 p4 00_0000
 // Temporarily use r1 and r2
 
 // Moving p2 value into r3  (*Remember: r1 holds msb and r2 holds lsb)
-mov r4, 0b00000110 // mask for upper bits
-and r1, r4         // OUT register = msb & 0b01101101
-mov r1, par        // r1 = OUT register = parity(msb & 0b01101101)
-mov r4, 0b01101101 // mask for lower bits
-and r2, r4         // lsb & 0b01101101
-xor r1, par        // OUT = parity(msb & 0b00000110) ^ parity(lsb & 0b01101101)
-mov r1, OUT ; save OUT to r1
+set 0b00000110 // mask for upper bits
+and r1, OUT         // OUT register = msb & 0b01101101
+mov r1, OUT        // r1 = OUT register = parity(msb & 0b01101101)
+set 0b01101101 // mask for lower bits
+and r2, OUT         
+mov r4, OUT   // r4 = lsb & 0b01101101
+xor r1, r4        // OUT = (msb & 0b00000110) ^ (lsb & 0b01101101)
+mov r1, par ; r1 = parity(OUT)
 set 3
 rot r1, OUT ; rotate and mask
 orr OUT, r3
@@ -73,11 +74,12 @@ ldr r1, OUT  // Return r1 back to mem[i+1]
 // p1
 set 0b00000101
 and r1, OUT         // sets OUT register to (msb & 0b00000101)
-mov r1, par        // Override r1 to r1 = parity(msb & 0b0000_0101)
+mov r1, OUT        // Override r1 to r1 = parity(msb & 0b0000_0101)
 set 0b01011011 // temporary register for r2
 and r2, OUT         // OUT = (lsb & 0b01011011)
-xor r1, par       
-mov r1, OUT // r1 = parity((msb & 0b00000101) ^ (lsb & 0b01011011))
+mov r4, OUT
+xor r1, r4       
+mov r1, par // r1 = parity((msb & 0b00000101) ^ (lsb & 0b01011011))
 
 set 4
 rot r1, OUT  // Turns OUT to 0b0001_0000
@@ -199,7 +201,7 @@ mov r2, OUT	// r1 now holds the first 4 or statements (r4 free again)
 set 0b00001000
 and r3, OUT
 mov r4, OUT ; r4 = 0000 p0 000
-set 4
+set 3
 rot r4, OUT ; OUT = 0000 000 p0
 orr OUT, r2
 mov r2, OUT		//r2 now holds out_lsw
