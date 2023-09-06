@@ -13,8 +13,9 @@ set loop_end
 beq r0, r4
 
 // r1 = msb, r2 = lsb
+set 30
 add r0, OUT // OUT = i + 30
-ldr r1, OUT          // r1 = mem[i + 30] replaces MSB
+ldr r1, OUT // r1 = mem[i + 30] replaces MSB
 set 31
 add r0, OUT
 ldr r2, OUT // r2 = mem[i + 31]
@@ -95,7 +96,8 @@ orr OUT, r3         // stores in p8 bit position in p3
 // p0_exp
 mov r4, 0b11111110
 and r4, r2          // lsb & 0b11110000
-xor OUT, r1         // msb ^ lsb & 11111110
+mov r4, OUT
+xor r4, r1         // msb ^ lsb & 11111110
 mov r4, par         // r4 holds p0_exp
 set 5
 rot r4, OUT         // r4 is now 0000_p0exp_000
@@ -109,13 +111,18 @@ and r4, r1          // msb & 0b10101010
 mov r4, OUT         // stores in r4
 set 0b10101000 // temporarily storing in output register
 and OUT, r2         // lsb & 0b10101000
-xOR OUT, r4         // (msb & 0b10101010) ^ (lsb & 0b10101000)
+mov r1, OUT
+xor r1, r4         // (msb & 0b10101010) ^ (lsb & 0b10101000)
 mov r4, par         // r4 now holds p1_exp
 set 4
 rot r4, OUT           // p1_exp in proper bit position
 mov r4, OUT
 xor r4, r3          // Xor just the p1 bit position
 mov r3, OUT
+//Returns r1 to initial state since we needed it for a temp reg
+set 30
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 30] replaces MSB
 
 // TODO p2_exp
 mov r4, 0b11001100
@@ -123,7 +130,8 @@ and r4, r1          // msb & 0b11001100
 mov r4, OUT         // stores in r4
 set 0b11001000 // temporarily storing in output register
 and OUT, r2         // lsb & 0b11001000
-xOR OUT, r4         // (msb & 0b11001100) ^ (lsb & 0b11001000)
+mov r1, OUT
+xor r1, r4         // (msb & 0b11001100) ^ (lsb & 0b11001000)
 mov r4, par         // r4 now holds p2_exp
 set 3
 rot r4, OUT           // p2_exp in proper bit position
@@ -131,6 +139,10 @@ mov r4, OUT
 xor r4, r3          // Xor just the p2 bit position
 mov r3, OUT
 
+//Replaces r1 back to original
+set 30
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 30] replaces MSB
 
 // TODO p4_exp
 mov r4, 0b00001111
@@ -140,13 +152,18 @@ and OUT, r4         // msb rrt(4) & 0b00001111
 mov r4, OUT         // r4 now has ^^
 set 0b10101000
 and OUT, r2         // lsb & 0b10101000
-xor OUT, r4         // (lsb & 0b10101000) ^ (msb rrt(4) & 0b00001111)
+mov r1, OUT
+xor r1, r4         // (lsb & 0b10101000) ^ (msb rrt(4) & 0b00001111)
 mov r4, par
 set 2
 rot r4, OUT
 mov r4, OUT
 xor r4, r3          // Xor just the p4 bit position
 mov r3, OUT
+//Replaces r1 again
+set 30
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 30] replaces MSB
 
 // TODO p8_exp
 mov r4, 0b01111111
@@ -298,7 +315,8 @@ add r3, r4          //OUT = hamming - 16
 mov r3, OUT         //r3 = ^^
 set 0b00000001
 rot OUT, r3
-xor r1, OUT
+mov r4, OUT
+xor r1, r4
 mov r1, OUT         //r1 now has msb_out
 set end_if_else
 beq r1, r1          //unconditional branch to end of if statement
@@ -315,7 +333,8 @@ add r3, r4          //8 - hamming
 mov r3, OUT         //r3 = ^^
 set 0b00000001
 rot OUT, r3         //(1 rrt(8 - hamming))
-xor r2, OUT
+mov r4, OUT
+xor r2, r4
 mov r2, OUT
 
 //r1 = msb_out ; r2 = lsb_out
@@ -353,7 +372,7 @@ and r2, OUT
 mov r2, OUT
 set 0b11110000
 and r2, OUT
-orr r4, OUT         
+orr OUT, r4         
 mov r4, OUT         //r4 now has final lout
 
 # So quick recap
