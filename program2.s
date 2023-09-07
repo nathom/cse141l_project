@@ -9,10 +9,7 @@
 mov r0, 0   // set r0 = i = 0
 loop_start:
 mov r0, r0
-mov r4, 32
-mov r3, 0
-set loop_end
-beq r0, r4
+
 
 // r1 = msb, r2 = lsb
 set 30
@@ -270,9 +267,9 @@ mov r1, OUT         // r1 now holds hout
 // Registers we can touch r4, r5, OUT
 mov r4, 0b00000000
 
-//if --> Beq r4,r3
-set equalParity
-beq r4, r3
+//if --> bne r4,r3
+set p0exp_loop
+bne r4, r3
 
 //TODO else if (p0 == p0_exp)
 hammingCheck:
@@ -284,10 +281,11 @@ set 0b00000001      //Isolating the p0_exp bit
 and r4, OUT     
 mov r4, OUT         //r4 holds p0_exp
 mov r5, 0b00000000
-set p0exp_loop
-beq r4, r5
+set else_hamming
+bne r4, r5
 
 //TODO else
+else_hamming:
 mov r4, 0b00000000          //Int hamming = 0;
 
 //First checking if p8 bit is bad
@@ -297,12 +295,13 @@ mov r1, OUT         //r1 now holds the temporary shifted r3
 set 0b00000001      //OUT now has the mask
 and r1, OUT         //masks the rotation so that its only one bit
 mov r1, OUT 
-mov r2, 0b00000000  //r2 holds the "one" value to represent a mismatch bit
+mov r2, 0b00000001  //r2 holds the "one" value to represent a mismatch bit
 //Logic : (p8 != p8_exp) hamming += 8
 //if p8 != p8_exp, that means the corresponding bit in r3 will be 1
 //So if the bit in r3 is 1, then you add 8, if its 0, then branch to p4
+//In other words, if r1 doesn't equal r2, then r3 = 0 meaning branch
 set parityfour
-beq r1, r2          //checks if the p8 bit is 
+bne r1, r2          //checks if the p8 bit is 
 set 0b00001000
 add r4, OUT
 mov r4, OUT
@@ -317,9 +316,9 @@ mov r1, OUT
 set 0b00000001
 and r1, OUT
 mov r1, OUT     //r1 holds isolated p4 from r3
-mov r2, 0b00000000  //r2 holds the "one" value to represent a mismatch bit
+mov r2, 0b00000001  //r2 holds the "one" value to represent a mismatch bit
 set paritytwo
-beq r1, r2
+bne r1, r2
 set 0b00000100
 add r4, OUT
 mov r4, OUT
@@ -333,9 +332,9 @@ mov r1, OUT
 set 0b00000001
 and r1, OUT
 mov r1, OUT
-mov r2, 0b00000000  //r2 holds the "one" value to represent a mismatch bit
+mov r2, 0b00000001  //r2 holds the "one" value to represent a mismatch bit
 set parityone
-beq r1, r2
+bne r1, r2
 set 0b00000010
 add r4, OUT
 mov r4, OUT
@@ -349,9 +348,9 @@ mov r1, OUT
 set 0b00000001
 and r1, OUT
 mov r1, OUT
-mov r2, 0b00000000  //r2 holds the "one" value to represent a mismatch bit
+mov r2, 0b00000001  //r2 holds the "one" value to represent a mismatch bit
 set lsb_out_set
-beq r1, r2
+bne r1, r2
 set 0b00000001
 add r4, OUT
 mov r4, OUT         //r4 now holds hamming total
@@ -370,20 +369,8 @@ set 0b11111000      //< 8 check
 and OUT, r4         //OUT now has hamming & 0b1111_1000
 mov r3, OUT
 mov r5, 0b00000000
-set lt_eight
-beq r5, r3         //checks if r4 == 0 which determines whether it is greater   
-
-//Case: GE Eight
-mov r3, 0b11110000  //should be -16?
-add r3, r4          //OUT = hamming - 16
-mov r3, OUT         //r3 = ^^
-set 0b00000001
-rot OUT, r3
-mov r4, OUT
-xor r1, r4
-mov r1, OUT         //r1 now has msb_out
-set end_if_else
-beq r1, r1          //unconditional branch to end of if statement
+set ge_eight
+bne r5, r3         //checks if r4 == 0 which determines whether it is greater   
 
 //r1 = msb_out ; r2 = lsb_out
 lt_eight:
@@ -401,6 +388,22 @@ rot OUT, r3         //(1 rrt(8 - hamming))
 mov r4, OUT
 xor r2, r4
 mov r2, OUT
+mov r3, 0
+mov r4, 1
+set end_if_else
+bne r3, r4
+
+//Case: GE Eight
+ge_eight:
+mov r0, r0
+mov r3, 0b11110000  //should be -16?
+add r3, r4          //OUT = hamming - 16
+mov r3, OUT         //r3 = ^^
+set 0b00000001
+rot OUT, r3
+mov r4, OUT
+xor r1, r4
+mov r1, OUT         //r1 now has msb_out
 
 //r1 = msb_out ; r2 = lsb_out
 end_if_else:
@@ -458,16 +461,21 @@ mov r4, OUT         //r4 now has final lout
  and r3, OUT
  mov r1, OUT        //r1 holds hout
 
-//needs to decrement by 30?
-//TODO lines 69 and 70
 
 str r1, r0 ; mem[i] = r1
 set 1
 add r0, OUT ; OUT = i + 1
 str r4, OUT ; mem[i+1] = r4
 
+mov r4, 32
+mov r3, 1
+add r0, r3
+mov r0, OUT
 set loop_start
-beq r0, r0 ; unconditional branch back up
+bne r0, r4
+
+// set loop_start remember to add the b back in
+// eq r0, r0 ; unconditional branch back up
 
 equalParity:
 mov r0, r0
@@ -475,8 +483,16 @@ str r2, r0
 mov r4, 1
 add r0, r4
 str r1, OUT
+
+//Bne branch back up
+mov r4, 32
+mov r3, 1
+add r0, r3
+mov r0, OUT
 set loop_start
-beq r4, r4
+bne r0, r4
+// set loop_start remember to add the b back in
+// eq r4, r4
 
 p0exp_loop:
 mov r0, r0
@@ -485,9 +501,13 @@ set 1
 add r0, OUT
 str r4, OUT
 
+//BNE Loop back up
+mov r4, 32
+mov r3, 1
+add r0, r3
+mov r0, OUT
 set loop_start
-beq r4, r4 ; unconditional branch back up
+bne r0, r4
+// set loop_start remember to add the b back in
+// eq r4, r4 ; unconditional branch back up
 
-
-loop_end:
-mov r0, r0
