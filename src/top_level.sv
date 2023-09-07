@@ -2,7 +2,6 @@
 module top_level (
     input        clk,
     reset,
-    req,
     output logic done
 );
   parameter D = 12;
@@ -59,7 +58,7 @@ module top_level (
   PC_LUT #(
       .D(D)
   ) pl1 (
-      .addr(out[1:0]),
+      .addr(out[4:0]),
       .target
   );
 
