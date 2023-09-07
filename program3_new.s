@@ -26,8 +26,7 @@ mov r0, r0 ; nop
 
 ldr r2, r0 ; r2 = mem[i]
 
-set 33
-ldr r3, OUT ; r3 = count = mem[33]
+mov r3, 0 ; r3 = count = 0
 
 mov r4, 0b11111000
 and r2, r4
@@ -102,6 +101,7 @@ mov r3, OUT ; r3 = count += 1
 if4:
 mov r0, r0 ; nop
 
+# if r3 != 0, increment byte count
 mov r2, 0
 set byte_count_increment
 bne r3, r2
@@ -128,24 +128,43 @@ str r2, OUT ; mem[34] = r2
 skip_byte_count_increment:
 mov r0, r0
 
+# mem[33] += count
 set 33
-str r3, OUT ; mem[33] = r3 = updated count
+ldr r4, OUT ; r4 = mem[33]
+add r4, r3
+mov r4, OUT ; r4 += count
+set 33
+str r4, OUT ; mem[33] = r4
+
+# mem[35] += count
 
 set 35
-ldr r4, OUT ; r4 = mem[35]
+ldr r4, OUT ; r4 = mem[33]
 add r4, r3
 mov r4, OUT ; r4 += count
 set 35
-str r4, OUT ; mem[35] = r4
+str r4, OUT ; mem[33] = r4
 
 # now r3 is free
 
-# TODO: add in i != 31 if statement
+# we only want to do this if we are not in
+# the last iteration, so skip to loop end
+# if i == 31
+mov r3, 31
+set calc_totalCount
+bne r0, r3
+
+mov r3, 33
+set if24
+bne r0, r3 ; unconditional branch, i never equal to 33
+
 
 # r0: i
 # r1: b
 # r2: mem[i+1]
 # r3, r4 free
+calc_totalCount:
+mov r0, r0 ; nop
 
 set 1
 add r0, OUT
@@ -294,7 +313,6 @@ str r3, OUT
 
 if24:
 mov r0, r0
-
 
 set 1
 add r0, OUT

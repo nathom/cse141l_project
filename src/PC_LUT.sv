@@ -13,13 +13,14 @@ module PC_LUT #(
       3: target = 5;
       4: target = 7;
       5: target = 10;
-      6: target = 9;
-      7: target = 9;
+      6: target = 6;
+      7: target = 126;
       8: target = 9;
       9: target = 9;
-      10: target = -223;
+      10: target = 9;
+      11: target = 9;
+      12: target = -236;
       default: target = 'b0;  // hold PC
     endcase
-
 
 endmodule

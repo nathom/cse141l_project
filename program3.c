@@ -12,15 +12,18 @@ main()
             count++;
             occurred = 1;
         }  // IF 1
-        if ((b & (0b01111100)) == (pattern >> 1)) {
+        pattern >>= 1;
+        if ((b & (0b01111100)) == pattern) {
             count++;
             occurred = 1;
         }
-        if ((b & (0b00111110)) == (pattern >> 2)) {
+        pattern >>= 1;
+        if ((b & (0b00111110)) == pattern) {
             count++;
             occurred = 1;
         }
-        if ((b & (0b00011111)) == (pattern >> 3)) {
+        pattern >>= 1;
+        if ((b & (0b00011111)) == pattern) {
             count++;
             occurred = 1;
         }
@@ -29,8 +32,6 @@ main()
         }  // IF 2
 
         // part c
-
-        pattern >>= 3;
         if (i != 31) {  // IF 3
 
             if ((((b & 0b00001111) << 1) | (mem[i + 1] >> 7)) == pattern) {

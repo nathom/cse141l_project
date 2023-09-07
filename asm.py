@@ -120,6 +120,13 @@ def decode_orr(reg1, reg0):
     return list(itertools.chain.from_iterable(decode(op) for op in ops))
 
 
+ENABLE_BNE = True
+
+if ENABLE_BNE:
+    print("INFO: Assembling with bne instead of beq", file=sys.stderr)
+else:
+    print("INFO: Assembling with beq instead of bne", file=sys.stderr)
+
 r_ops = {
     "add": "000",
     "rot": "001",
@@ -128,6 +135,7 @@ r_ops = {
     "str": "100",
     "mov": "101",
     "beq": "110",
+    "bne" if ENABLE_BNE else "beq": "110",
 }
 pseudo_ops = {"xor": decode_xor, "and": decode_and, "orr": decode_orr}
 registers = {
@@ -379,4 +387,5 @@ the done flag is not raised before pc hits {curr_pc+1}.
 
 
 if __name__ == "__main__":
+    # TODO: compress PC_LUT by reusing relative branch sizes
     main()

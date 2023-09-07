@@ -3,14 +3,12 @@ module top_level_tb;
   // Testbench signals
   reg   clk = 0;
   reg   reset = 1;  // Start with reset asserted
-  reg   req = 0;
   logic done;
 
   // Instantiate the DUT (Design Under Test)
   top_level dut (
       .clk  (clk),
       .reset(reset),
-      .req  (req),
       .done (done)
   );
   always begin  // continuous loop

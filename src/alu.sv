@@ -17,7 +17,8 @@ module alu (
     rslt = 'b0;
     // sc_o = 'b0;
     // zero = rslt == 0;
-    eq  = inA == inB;
+    // change to != when using BNE, == when using BEQ
+    eq  = inA != inB;
     case (alu_cmd)
       2'b00:  // add no carry
       rslt = inA + inB;
