@@ -196,30 +196,35 @@ orr OUT, p3         //Inserts into p3
 mov r3, OUT
 
 // Idk if its smart to set something to zero here but i'm going to do it anyways
-// line 25
+// line 25 lout |= (lsb rrt(3) & 0b00011111) & 0b00000001;
 mov r4, 0b00011111
 set 3
 rot r2, OUT
 and OUT, r4          // lsb rrt(3) & 0b00011111
-mov r4, 0b00000001   
+mov r4, OUT          //r4 = ^^
+set 0b00000001   
 and r4, OUT          // (lsb rrt(3) & 0b00011111) & 0b00000001
-// line 26
+
+// line 26           lout |= (lsb rrt(4) & 0b00001111) & 0b00001110;
 mov r1, OUT          // Temporarily replacing MSB with AND result
 mov r4, 0b00001111
 set 4
 rot r2, OUT
 and OUT, r4         // OUT = lsb rrt(4) & 0b00001111
-mov r4, 0b00001110
+mov r4, OUT
+set 0b00001110
 and r4, OUT         // (lsb rrt(4) & 0b00001111) & 0b00001110
 orr OUT, r1         // Or operation from line 25 operations
 mov r2, OUT         // Temporarily storing the new or operation in r2
 ldr r1, r0          // r1 = mem[i] returns MSB to original value
+
 // line 27
 mov r4, 0b11111000
 set 5
 rot r1, OUT
 and r1, r4          // msb rrt(5) & 0b11111000
-mov r4, 0b11110000
+mov r4, OUT         //r4 = ^^
+set 0b11110000
 and OUT, r4
 orr OUT, r2         
 mov r2, OUT         // r2 now holds the final lout
