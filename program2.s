@@ -122,7 +122,7 @@ xor r4, r3          // Xor just the p1 bit position
 mov r4, OUT         
 set 0b00010000      
 and OUT, r4         //Mask to get ONLY p1
-orr OUT, p3         //Inserts into p3
+orr OUT, r3         //Inserts into p3
 mov r3, OUT
 //Returns r1 to initial state since we needed it for a temp reg
 set 30
@@ -146,7 +146,7 @@ xor r4, r3          // Xor just the p2 bit position
 mov r4, OUT         
 set 0b00100000      
 and OUT, r4         //Mask to get ONLY p2
-orr OUT, p3         //Inserts into p3
+orr OUT, r3         //Inserts into p3
 mov r3, OUT
 
 //Replaces r1 back to original
@@ -172,7 +172,7 @@ xor r4, r3          // Xor just the p4 bit position
 mov r4, OUT         
 set 0b01000000      
 and OUT, r4         //Mask to get ONLY p4
-orr OUT, p3         //Inserts into p3
+orr OUT, r3         //Inserts into p3
 mov r3, OUT
 //Replaces r1 again
 set 30
@@ -192,7 +192,7 @@ xor r4, r3          // Xor just the p8 bit position
 mov r4, OUT         
 set 0b10000000      
 and OUT, r4         //Mask to get ONLY p8
-orr OUT, p3         //Inserts into p3
+orr OUT, r3         //Inserts into p3
 mov r3, OUT
 
 // Idk if its smart to set something to zero here but i'm going to do it anyways
