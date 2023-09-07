@@ -19,68 +19,49 @@ set 31
 add r0, OUT
 ldr r2, OUT // r2 = mem[i + 31]
 
-// Format p8_p4_p2_p1_p0_000
+// Format r3 = p8_p4_p2_p1_p0_000
 
 // p0
 mov r4, 0b00000001
-mov r0, r0
 and r2, r4          // OUT = lsb & 0b00000001
 mov r4, OUT
 set 5
 rot r4, OUT
-orr OUT, r3         // Stores p0 bit in 4th bit position
-mov r3, OUT
+mov r3, OUT         // r3 = 0000 p0 000
 
 
 // p1
 mov r4, 0b00000010
-and r2, r4          // OUT = lsb & 0b00000010
-mov r4, OUT
-set 1
-rot r4, OUT         //OUT = (lsb & 0b00000010) rrt(1)
-mov r4, OUT         // r4 now holds (lsb & 0b00000010) rrt(1)
+and r2, r4          
+mov r4, OUT         // r4 = lsb & 0b00000010
+set 5
+rot r4, OUT         //OUT = (lsb & 0b00000010) rrt(5)
+orr OUT, r3
+mov r3, OUT ; r3 = 000 p1 p0 000
 
-set 0b01111111      
-and r4, OUT         // OUT = (lsb & 0b00000010) rrt(1) & 0b01111111
-mov r4, OUT         // r4 = lsb & 0b00000010) rrt(1) & 0b01111111
-set 4
-rot r4, OUT         //Rotates to p1 bit position
-mov r4, OUT
-orr r4, r3          // Stores bit in parity register p3
-mov r3, OUT
-//(lsb & 0b00000010) rrt(1) & 0b01111111
 
 // p2
 mov r4, 0b00000100
 and r4, r2          //(lsb & 0b00000100)
 mov r4, OUT         //r4 = (lsb & 0b00000100)
-set 2      
-rot r4, OUT         //(lsb & 0b00000100) rrt(2)
-mov r4, OUT         //r4 = (lsb & 0b00000100) rrt(2)
-set 0b00111111 
-and r4, OUT         // (lsb & 0b00000100) rrt(2) & 0b00111111
-mov r4, OUT         //r4 = ^^
-set 3
-rot r4, OUT         // Places in p2 bit position
-orr OUT, r3         // Stores in r3
-mov r3, OUT
-//(lsb & 0b00000100) rrt(2) & 0b00111111
+set 5      
+rot r4, OUT         // OUT = 00 p2 0 0000 
+orr OUT, r3 
+mov r3, OUT ; r3 = 00 p2 p1 p0 000
 
-// p4
-mov r4, 0b00010000  
+
+set 0b00000001
+mov r4, OUT
+set 4
+rot r4, OUT
+mov r4, OUT ; r4 = 0b00010000, fewer instructions than mov imm
 and r4, r2          //(lsb & 0b00010000)
 mov r4, OUT         //r4 = ^^
-set 4
-rot r4, OUT          
-mov r4, OUT         //r4 = (lsb & 0b00010000) rrt(4)
-set 0b00001111
-and OUT, r4         // (lsb & 0b00000100) rrt(2) & 0b00111111
-mov r4, OUT         //r4= ^^
-set 2
-rot r4, OUT         //Rotates intto p4 bit position
+set 6
+rot r4, OUT           ; r4 = 0 p4 00 0000
 orr OUT, r3
-mov r3, OUT
-//(lsb & 0b00010000) rrt(4) & 0b00001111
+mov r3, OUT ; r3 = 0 p4 p2 p1 p0 000
+
 
 // p8
 mov r4, 0b00000001
@@ -89,9 +70,11 @@ mov r4, OUT
 set 1
 rot r4, OUT         //Rotates into p8 posittion
 orr OUT, r3         // stores in p8 bit position in p3
-mov r3, OUT
+mov r3, OUT ; r3 = p8 p4 p2 p1 p0 000
 
-// Expected Parity Bits
+// Done with found parity bits
+
+// Start Expected Parity Bits
 
 // p0_exp
 mov r4, 0b11111110
