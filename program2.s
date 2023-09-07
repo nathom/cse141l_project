@@ -10,6 +10,7 @@ mov r0, 0   // set r0 = i = 0
 loop_start:
 mov r0, r0
 mov r4, 32
+mov r3, 0
 set loop_end
 beq r0, r4
 
@@ -25,11 +26,13 @@ ldr r2, OUT // r2 = mem[i + 31]
 
 // p0
 mov r4, 0b00000001
+mov r0, r0
 and r2, r4          // OUT = lsb & 0b00000001
 mov r4, OUT
 set 5
 rot r4, OUT
 orr OUT, r3         // Stores p0 bit in 4th bit position
+mov r3, OUT
 
 
 // p1
@@ -95,7 +98,7 @@ mov r3, OUT
 
 // p0_exp
 mov r4, 0b11111110
-and r4, r2         // OUT = lsb & 0b11110000
+and r4, r2         // OUT = lsb & 0b11111110
 mov r4, OUT
 xor r4, r1         // msb ^ lsb & 11111110
 mov r4, par        // r4 holds p0_exp
@@ -122,7 +125,11 @@ xor r4, r3          // Xor just the p1 bit position
 mov r4, OUT         
 set 0b00010000      
 and OUT, r4         //Mask to get ONLY p1
-orr OUT, r3         //Inserts into p3
+mov r4, OUT
+set 0b11101111      //r3 clears out garbage data
+and OUT, r3
+mov r3, OUT
+orr r4, r3         //Inserts into p3
 mov r3, OUT
 //Returns r1 to initial state since we needed it for a temp reg
 set 30
@@ -146,8 +153,13 @@ xor r4, r3          // Xor just the p2 bit position
 mov r4, OUT         
 set 0b00100000      
 and OUT, r4         //Mask to get ONLY p2
-orr OUT, r3         //Inserts into p3
+mov r4, OUT
+set 0b11011111      //r3 clears out garbage data
+and r3, OUT
 mov r3, OUT
+orr r3, r4
+mov r3, OUT         //Inserts into p3
+
 
 //Replaces r1 back to original
 set 30
@@ -160,11 +172,11 @@ set 4
 rot r1, OUT
 and OUT, r4         // msb rrt(4) & 0b00001111
 mov r4, OUT         // r4 now has ^^
-set 0b10101000
-and OUT, r2         // lsb & 0b10101000
+set 0b11100000
+and OUT, r2         // lsb & 0b11100000
 mov r1, OUT
 xor r1, r4         // (lsb & 0b10101000) ^ (msb rrt(4) & 0b00001111)
-mov r4, par
+mov r4, par        //r4 now has p4_exp
 set 2
 rot r4, OUT
 mov r4, OUT
@@ -172,8 +184,13 @@ xor r4, r3          // Xor just the p4 bit position
 mov r4, OUT         
 set 0b01000000      
 and OUT, r4         //Mask to get ONLY p4
-orr OUT, r3         //Inserts into p3
+mov r4, OUT
+set 0b10111111      //r3 clears out garbage data
+and r3, OUT
 mov r3, OUT
+orr r3, r4
+mov r3, OUT         //Inserts p4 into r3
+
 //Replaces r1 again
 set 30
 add r0, OUT // OUT = i + 30
@@ -182,18 +199,28 @@ ldr r1, OUT // r1 = mem[i + 30] replaces MSB
 // TODO p8_exp
 mov r4, 0b01111111
 set 1
-rot r1, OUT
+rot r1, OUT         //msb rrt(1)
+mov r1, OUT         //r1 = ^^
 and r1, r4          // OUT = msb rrt(1) & 0b01111111
 mov r4, par         // r4 now holds p8
 set 1
-rot r4, OUT           // p8 in proper bit position
+rot r4, OUT         // p8 in proper bit position
 mov r4, OUT
 xor r4, r3          // Xor just the p8 bit position
 mov r4, OUT         
 set 0b10000000      
 and OUT, r4         //Mask to get ONLY p8
-orr OUT, r3         //Inserts into p3
+mov r4, OUT
+set 0b01111111      //r3 clears out garbage data
+and r3, OUT         
 mov r3, OUT
+orr r3, r4          //inserts r8 into bit position
+mov r3, OUT         //Inserts into p3
+
+//Replaces r1 again
+set 30
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 30] replaces MSB
 
 // Idk if its smart to set something to zero here but i'm going to do it anyways
 // line 25 lout |= (lsb rrt(3) & 0b00011111) & 0b00000001;
