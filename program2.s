@@ -243,13 +243,17 @@ set 0b00001110
 and r4, OUT         // (lsb rrt(4) & 0b00001111) & 0b00001110
 orr OUT, r1         // Or operation from line 25 operations
 mov r2, OUT         // Temporarily storing the new or operation in r2
-ldr r1, r0          // r1 = mem[i] returns MSB to original value
+
+//Replaces r1 again
+set 30
+add r0, OUT 
+ldr r1, OUT        // r1 = mem[i] returns MSB to original value
 
 // line 27
 mov r4, 0b11111000
 set 5
 rot r1, OUT
-and r1, r4          // msb rrt(5) & 0b11111000
+and OUT, r4          // msb rrt(5) & 0b11111000
 mov r4, OUT         //r4 = ^^
 set 0b11110000
 and OUT, r4
@@ -293,7 +297,10 @@ mov r1, OUT         //r1 now holds the temporary shifted r3
 set 0b00000001      //OUT now has the mask
 and r1, OUT         //masks the rotation so that its only one bit
 mov r1, OUT 
-mov r2, 0b00000001  //r2 holds the "one" value to represent a mismatch bit
+mov r2, 0b00000000  //r2 holds the "one" value to represent a mismatch bit
+//Logic : (p8 != p8_exp) hamming += 8
+//if p8 != p8_exp, that means the corresponding bit in r3 will be 1
+//So if the bit in r3 is 1, then you add 8, if its 0, then branch to p4
 set parityfour
 beq r1, r2          //checks if the p8 bit is 
 set 0b00001000
@@ -309,7 +316,8 @@ rot r3, OUT
 mov r1, OUT
 set 0b00000001
 and r1, OUT
-mov r1, OUT
+mov r1, OUT     //r1 holds isolated p4 from r3
+mov r2, 0b00000000  //r2 holds the "one" value to represent a mismatch bit
 set paritytwo
 beq r1, r2
 set 0b00000100
@@ -325,6 +333,7 @@ mov r1, OUT
 set 0b00000001
 and r1, OUT
 mov r1, OUT
+mov r2, 0b00000000  //r2 holds the "one" value to represent a mismatch bit
 set parityone
 beq r1, r2
 set 0b00000010
@@ -340,6 +349,7 @@ mov r1, OUT
 set 0b00000001
 and r1, OUT
 mov r1, OUT
+mov r2, 0b00000000  //r2 holds the "one" value to represent a mismatch bit
 set lsb_out_set
 beq r1, r2
 set 0b00000001
@@ -476,7 +486,7 @@ add r0, OUT
 str r4, OUT
 
 set loop_start
-beq r0, r0 ; unconditional branch back up
+beq r4, r4 ; unconditional branch back up
 
 
 loop_end:
