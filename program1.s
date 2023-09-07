@@ -3,14 +3,9 @@
 # r2: lsb
 
 mov r0, 0    // set r0 = 0
-mov r1, 30
 
 loop_start:
 mov r0, r0 ; nop
-# break if i == 32
-mov r1, 32
-set loop_end
-beq r0, r1
 
 // r1 for msb, r2 for lsb
 ldr r2, r0  // r1 = mem[i]
@@ -217,8 +212,6 @@ set 2
 add r0, OUT
 mov r0, OUT
 
+mov r4, 30
 set loop_start
-beq r0, r0
-
-loop_end:
-mov r0, r0
+bne r0, r4
