@@ -163,7 +163,7 @@ label_re = re.compile(pre + r"([_\w]+):" + post)
 immediate = re.compile(r"(\d+|0b[01]+)")
 
 pc = 0  # program counter
-branch_counter = 0  # running count of number of branches
+branch_counter = 8  # running count of number of branches
 
 # mapping from brach label to pc value
 branches: dict[str, int] = {}

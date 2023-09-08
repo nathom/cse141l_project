@@ -31,12 +31,12 @@ module prog3_tb ();
              DUT.rf1.core[4], DUT.rf1.core[5], DUT.rf1.core[6], DUT.rf1.core[7]);
     // program 3
     // pattern we are looking for; experiment w/ various values
-    pat = 5'b0000;  //5'b10101;//$random;//5'b11111;
+    pat = 'b11001;  //5'b0000;  //5'b10101;//$random;//5'b11111;
     str2 = 0;
     DUT.dm1.core[32] = {pat, 3'b0};
     for (int i = 0; i < 32; i++) begin
       // search field; experiment w/ various vales
-      mat_str[i] = 8'b00000000;  //8'b01010101;// $random;// 8'b11111111;
+      mat_str[i] = $random;  // 8'b00000000;  //8'b01010101;// $random;// 8'b11111111;
       DUT.dm1.core[i] = mat_str[i];
       str2 = (str2 << 8) + mat_str[i];
     end

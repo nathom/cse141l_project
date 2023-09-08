@@ -12,18 +12,15 @@ main()
             count++;
             occurred = 1;
         }  // IF 1
-        pattern >>= 1;
-        if ((b & (0b01111100)) == pattern) {
+        if (((b & (0b01111100)) << 1) == pattern) {
             count++;
             occurred = 1;
         }
-        pattern >>= 1;
-        if ((b & (0b00111110)) == pattern) {
+        if ((b & (0b00111110) << 2) == pattern) {
             count++;
             occurred = 1;
         }
-        pattern >>= 1;
-        if ((b & (0b00011111)) == pattern) {
+        if ((b & (0b00011111) << 3) == pattern) {
             count++;
             occurred = 1;
         }
