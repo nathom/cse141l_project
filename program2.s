@@ -102,14 +102,15 @@ mov r1, par ; r1 = p1_exp
 set 4
 rot r1, OUT
 orr OUT, r4 ; r4 = 000 p1exp p0exp 000
+mov r4, OUT
 
-// Restore r1 and r2 to msb, lsb
-set 30
-add r0, OUT // OUT = i + 30
-ldr r1, OUT // r1 = mem[i + 30] replaces MSB
+// r1 = msb, r2 = lsb
 set 31
 add r0, OUT // OUT = i + 30
-ldr r2, OUT // r1 = mem[i + 30] replaces MSB
+ldr r1, OUT // r1 = mem[i + 31] replaces MSB
+set 30
+add r0, OUT
+ldr r2, OUT // r2 = mem[i + 30]
 
 // p2_exp
 set 0b11001100
@@ -123,14 +124,15 @@ mov r1, par ; r1 = p2_exp
 set 3
 rot r1, OUT
 orr OUT, r4 ; r4 = 00 p2exp p1exp p0exp 000
+mov r4, OUT
 
-// Restore r1 and r2 to msb, lsb
-set 30
-add r0, OUT // OUT = i + 30
-ldr r1, OUT // r1 = mem[i + 30] replaces MSB
+// r1 = msb, r2 = lsb
 set 31
 add r0, OUT // OUT = i + 30
-ldr r2, OUT // r1 = mem[i + 30] replaces MSB
+ldr r1, OUT // r1 = mem[i + 31] replaces MSB
+set 30
+add r0, OUT
+ldr r2, OUT // r2 = mem[i + 30]
 
 // p4_exp
 set 4
@@ -147,14 +149,15 @@ mov r1, par ; r1 = p2_exp
 set 2
 rot r1, OUT
 orr OUT, r4 ; r4 = 0 p4exp p2exp p1exp p0exp 000
+mov r4, OUT
 
-// Restore r1 and r2 to msb, lsb
-set 30
-add r0, OUT // OUT = i + 30
-ldr r1, OUT // r1 = mem[i + 30] replaces MSB
+// r1 = msb, r2 = lsb
 set 31
 add r0, OUT // OUT = i + 30
-ldr r2, OUT // r1 = mem[i + 30] replaces MSB
+ldr r1, OUT // r1 = mem[i + 31] replaces MSB
+set 30
+add r0, OUT
+ldr r2, OUT // r2 = mem[i + 30]
 
 // p8_exp
 set 1
@@ -168,10 +171,13 @@ rot r1, OUT
 orr OUT, r4
 mov r4, OUT ; r4 = p8exp p4exp p2exp p1exp p0exp 000
 
-// Restore r1 to msb
-set 30
+// r1 = msb, r2 = lsb
+set 31
 add r0, OUT // OUT = i + 30
-ldr r1, OUT // r1 = mem[i + 30] replaces MSB
+ldr r1, OUT // r1 = mem[i + 31] replaces MSB
+set 30
+add r0, OUT
+ldr r2, OUT // r2 = mem[i + 30]
 
 // compute r3 = r3 ^ r4
 xor r3, r4
@@ -218,10 +224,13 @@ and OUT, r2 ; OUT = msb rrt(5) & 0b11110000
 orr OUT, r4
 mov r4, OUT ; lout |= msb rrt(5) & 0b11110000
 
-// Restore r2 to lsb
+// r1 = msb, r2 = lsb
 set 31
-add r0, OUT // OUT = i + 31
-ldr r2, OUT // r2 = mem[i + 31] replaces lsb
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 31] replaces MSB
+set 30
+add r0, OUT
+ldr r2, OUT // r2 = mem[i + 30]
 
 str r4, r0 ; mem[i] = lout
 
@@ -287,11 +296,13 @@ set 0b00001111 ; r4 = p0 000 p8 p4 p2 p1
 and r4, OUT ; get rid of p0
 mov r4, OUT ; r4 = hamming
 
-// make sure r1 = msb, r2 = lsb
-ldr r1, r0          // r1 = mem[i] replaces MSB
-set 1
-add r0, OUT          // OUT = i + 1
-ldr r2, OUT         // r2 = mem[OUT] = mem[i+1] replaces LSb
+// r1 = msb, r2 = lsb
+set 31
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 31] replaces MSB
+set 30
+add r0, OUT
+ldr r2, OUT // r2 = mem[i + 30]
 
 set 0b00001000      // < 8 check
 and OUT, r4         // OUT now has hamming & 0b1111_1000
@@ -396,6 +407,6 @@ set 2
 add r0, OUT
 mov r0, OUT ; increment i
 
-mov r4, 32
+mov r4, 30
 set loop_start
 bne r0, r4

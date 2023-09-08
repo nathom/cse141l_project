@@ -9,9 +9,9 @@
 //    
 module prog2_tb ();
 
-  bit clk;  // clock source -- drives DUT input of same name
+  bit clk, reset;  // clock source -- drives DUT input of same name
 
-  wire done, reset;  // ack -- from DUT -- done w/ program
+  wire done;  // ack -- from DUT -- done w/ program
 
   // program 1-specific variables
   bit [11:1] d1_in[15];  // original messages
@@ -43,12 +43,16 @@ module prog2_tb ();
       $monitor("%d:: registers: r0: %b, r1: %b, r2: %b, r3: %b, r4: %b, r5: %b, r6: %b, out: %b",
                DUT.prog_ctr, DUT.rf1.core[0], DUT.rf1.core[1], DUT.rf1.core[2], DUT.rf1.core[3],
                DUT.rf1.core[4], DUT.rf1.core[5], DUT.rf1.core[6], DUT.rf1.core[7]);
+      // data
       d2_in[i] = $random;
       p8 = ^d2_in[i][11:5];
       p4 = (^d2_in[i][11:8]) ^ (^d2_in[i][4:2]);
       p2 = d2_in[i][11]^d2_in[i][10]^d2_in[i][7]^d2_in[i][6]^d2_in[i][4]^d2_in[i][3]^d2_in[i][1];
       p1 = d2_in[i][11]^d2_in[i][ 9]^d2_in[i][7]^d2_in[i][5]^d2_in[i][4]^d2_in[i][2]^d2_in[i][1];
       p0 = ^d2_in[i] ^ p8 ^ p4 ^ p2 ^ p1;
+      $display("For %d", i);
+      $displayb({p8, p4, p2, p1, p0});
+      // original message
       d2_good[i] = {d2_in[i][11:5], p8, d2_in[i][4:2], p4, d2_in[i][1], p2, p1, p0};
       // flip one bit
       flip[i] = $random;  // 'b1000000;
