@@ -1,5 +1,33 @@
 # 9 bit processor
 
+## Guide to the repo
+
+
+### asm.py
+
+A user-friendly assembler that features pseudo ops, debug output, and comment parsing.
+
+### /src
+
+Contains all of the SystemVerilog files that make up the microprocessor.
+
+#### mach\_code.txt
+
+Contains the machine code that will be read by the instruction ROM by default.
+The contents of this file determine which program you are runnning.
+
+
+### /pseudocode
+
+Contains C-like pseudocode for each of the test programs
+
+### /test\_asm
+
+Contains assembly programs used to test the microprocessor
+or the assembler.
+    
+
+
 ## Using the assembler
 
 Make sure you have python3 installed. Write a script in LEAP asm, and save
