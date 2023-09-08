@@ -12,12 +12,12 @@ mov r0, r0
 
 
 // r1 = msb, r2 = lsb
-set 30
-add r0, OUT // OUT = i + 30
-ldr r1, OUT // r1 = mem[i + 30] replaces MSB
 set 31
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 31] replaces MSB
+set 30
 add r0, OUT
-ldr r2, OUT // r2 = mem[i + 31]
+ldr r2, OUT // r2 = mem[i + 30]
 
 // Format r3 = p8_p4_p2_p1_p0_000
 
@@ -50,6 +50,7 @@ orr OUT, r3
 mov r3, OUT ; r3 = 00 p2 p1 p0 000
 
 
+// p4
 set 0b00000001
 mov r4, OUT
 set 4
@@ -76,6 +77,8 @@ mov r3, OUT ; r3 = p8 p4 p2 p1 p0 000
 
 // Start Expected Parity Bits
 
+// Format r4 = p8exp p4exp p2exp p1exp p0exp 000
+
 // p0_exp
 mov r4, 0b11111110
 and r4, r2         // OUT = lsb & 0b11111110
@@ -85,292 +88,234 @@ mov r4, par        // r4 holds p0_exp
 set 5
 rot r4, OUT         // r4 is now 0000_p0exp_000
 mov r4, OUT
-xor r4, r3          // If its the same then the equivalent bit in r3 should be 0
-mov r3, OUT
-//parity(msb) ^ parity(lsb & 11111110);
-
-// TODO p1_exp
-mov r4, 0b10101010
-and r4, r1          // OUT = msb & 0b10101010
-mov r4, OUT         // stores in r4
-set 0b10101000      // temporarily storing in output register
-and OUT, r2         // lsb & 0b10101000
-mov r1, OUT
-xor r1, r4          // (msb & 0b10101010) ^ (lsb & 0b10101000)
-mov r4, par         // r4 now holds p1_exp
-set 4
-rot r4, OUT         // p1_exp in proper bit position
-mov r4, OUT
-xor r4, r3          // Xor just the p1 bit position
-mov r4, OUT         
-set 0b00010000      
-and OUT, r4         //Mask to get ONLY p1
-mov r4, OUT
-set 0b11101111      //r3 clears out garbage data
-and OUT, r3
-mov r3, OUT
-orr r4, r3         //Inserts into p3
-mov r3, OUT
-//Returns r1 to initial state since we needed it for a temp reg
-set 30
-add r0, OUT // OUT = i + 30
-ldr r1, OUT // r1 = mem[i + 30] replaces MSB
-//parity(msb & 0b10101010) ^ parity(lsb & 0b10101000);
-
-// TODO p2_exp
-mov r4, 0b11001100
-and r4, r1          // msb & 0b11001100
-mov r4, OUT         // stores in r4
-set 0b11001000 // temporarily storing in output register
-and OUT, r2         // lsb & 0b11001000
-mov r1, OUT
-xor r1, r4          // (msb & 0b11001100) ^ (lsb & 0b11001000)
-mov r4, par         // r4 now holds p2_exp
-set 3
-rot r4, OUT         // p2_exp in proper bit position
-mov r4, OUT
-xor r4, r3          // Xor just the p2 bit position
-mov r4, OUT         
-set 0b00100000      
-and OUT, r4         //Mask to get ONLY p2
-mov r4, OUT
-set 0b11011111      //r3 clears out garbage data
-and r3, OUT
-mov r3, OUT
-orr r3, r4
-mov r3, OUT         //Inserts into p3
 
 
-//Replaces r1 back to original
-set 30
-add r0, OUT // OUT = i + 30
-ldr r1, OUT // r1 = mem[i + 30] replaces MSB
-
-// TODO p4_exp
-mov r4, 0b00001111
+// p1_exp
+set 0b10101010
+and OUT, r1          // OUT = msb & 0b10101010
+mov r1, OUT ; r1 = msb & 0b10101010
+set 0b10101000     
+and OUT, r2
+mov r2, OUT ; r2 = lsb & 0b10101000     
+xor r1, r2
+mov r1, par ; r1 = p1_exp
 set 4
 rot r1, OUT
-and OUT, r4         // msb rrt(4) & 0b00001111
-mov r4, OUT         // r4 now has ^^
+orr OUT, r4 ; r4 = 000 p1exp p0exp 000
+
+// Restore r1 and r2 to msb, lsb
+set 30
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 30] replaces MSB
+set 31
+add r0, OUT // OUT = i + 30
+ldr r2, OUT // r1 = mem[i + 30] replaces MSB
+
+// p2_exp
+set 0b11001100
+and OUT, r1     
+mov r1, OUT ; r1 = msb & 0b11001100
+set 0b11001000
+and OUT, r2
+mov r2, OUT ; r2 = lsb & 0b11001000
+xor r1, r2
+mov r1, par ; r1 = p2_exp
+set 3
+rot r1, OUT
+orr OUT, r4 ; r4 = 00 p2exp p1exp p0exp 000
+
+// Restore r1 and r2 to msb, lsb
+set 30
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 30] replaces MSB
+set 31
+add r0, OUT // OUT = i + 30
+ldr r2, OUT // r1 = mem[i + 30] replaces MSB
+
+// p4_exp
+set 4
+rot r1, OUT
+mov r1, OUT ; r1 = msb rot(4)
+set 0b00001111
+and OUT, r1     
+mov r1, OUT ; r1 = msb rot(4) & 0b00001111
 set 0b11100000
-and OUT, r2         // lsb & 0b11100000
-mov r1, OUT
-xor r1, r4         // (lsb & 0b10101000) ^ (msb rrt(4) & 0b00001111)
-mov r4, par        //r4 now has p4_exp
+and OUT, r2
+mov r2, OUT ; r2 = lsb & 0b11001000
+xor r1, r2
+mov r1, par ; r1 = p2_exp
 set 2
-rot r4, OUT
-mov r4, OUT
-xor r4, r3          // Xor just the p4 bit position
-mov r4, OUT         
-set 0b01000000      
-and OUT, r4         //Mask to get ONLY p4
-mov r4, OUT
-set 0b10111111      //r3 clears out garbage data
-and r3, OUT
-mov r3, OUT
-orr r3, r4
-mov r3, OUT         //Inserts p4 into r3
+rot r1, OUT
+orr OUT, r4 ; r4 = 0 p4exp p2exp p1exp p0exp 000
 
-//Replaces r1 again
+// Restore r1 and r2 to msb, lsb
+set 30
+add r0, OUT // OUT = i + 30
+ldr r1, OUT // r1 = mem[i + 30] replaces MSB
+set 31
+add r0, OUT // OUT = i + 30
+ldr r2, OUT // r1 = mem[i + 30] replaces MSB
+
+// p8_exp
+set 1
+rot r1, OUT
+mov r1, OUT
+set 0b01111111
+and r1, OUT
+mov r1, par ; r1 = parity(msb rrt(1) & 0b01111111);
+set 1
+rot r1, OUT
+orr OUT, r4
+mov r4, OUT ; r4 = p8exp p4exp p2exp p1exp p0exp 000
+
+// Restore r1 to msb
 set 30
 add r0, OUT // OUT = i + 30
 ldr r1, OUT // r1 = mem[i + 30] replaces MSB
 
-// TODO p8_exp
-mov r4, 0b01111111
-set 1
-rot r1, OUT         //msb rrt(1)
-mov r1, OUT         //r1 = ^^
-and r1, r4          // OUT = msb rrt(1) & 0b01111111
-mov r4, par         // r4 now holds p8
-set 1
-rot r4, OUT         // p8 in proper bit position
-mov r4, OUT
-xor r4, r3          // Xor just the p8 bit position
-mov r4, OUT         
-set 0b10000000      
-and OUT, r4         //Mask to get ONLY p8
-mov r4, OUT
-set 0b01111111      //r3 clears out garbage data
-and r3, OUT         
+// compute r3 = r3 ^ r4
+xor r3, r4
 mov r3, OUT
-orr r3, r4          //inserts r8 into bit position
-mov r3, OUT         //Inserts into p3
 
-//Replaces r1 again
-set 30
-add r0, OUT // OUT = i + 30
-ldr r1, OUT // r1 = mem[i + 30] replaces MSB
+// if all the parity bits are equal it will be 0b00000000
+// if any are not equal one of the high bits will be 1
+mov r4, 0
+set else_if_p0_eq_p0_exp
+bne r3, r4
 
-// Idk if its smart to set something to zero here but i'm going to do it anyways
-// line 25 lout |= (lsb rrt(3) & 0b00011111) & 0b00000001;
-mov r4, 0b00011111
+// r4 is free
+
+// register state:
+// r1: msb
+// r2: lsb
+// r3: parity XORed with expected parity
+// r4: lout
+
 set 3
 rot r2, OUT
-and OUT, r4          // lsb rrt(3) & 0b00011111
-mov r4, OUT          //r4 = ^^
-set 0b00000001   
-and r4, OUT          // (lsb rrt(3) & 0b00011111) & 0b00000001
+mov r4, OUT
+set 1
+and r4, OUT
+mov r4, OUT ; r4 (lout) = (lsb >> 3) & 1
 
-// line 26           lout |= (lsb rrt(4) & 0b00001111) & 0b00001110;
-mov r1, OUT          // Temporarily replacing MSB with AND result
-mov r4, 0b00001111
 set 4
 rot r2, OUT
-and OUT, r4         // OUT = lsb rrt(4) & 0b00001111
-mov r4, OUT
+mov r2, OUT ; r2 = (lout >> 4)
 set 0b00001110
-and r4, OUT         // (lsb rrt(4) & 0b00001111) & 0b00001110
-orr OUT, r1         // Or operation from line 25 operations
-mov r2, OUT         // Temporarily storing the new or operation in r2
+and r2, OUT ; OUT = (lout >> 4) & 0b00001110
+orr OUT, r4
+mov r4, OUT ; lout |= r2
 
-//Replaces r1 again
-set 30
-add r0, OUT 
-ldr r1, OUT        // r1 = mem[i] returns MSB to original value
+// r2 NO LONGER lsb
 
-// line 27
-mov r4, 0b11111000
+mov r2, 0b00001111
+set 4
+rot r2, OUT
+mov r2, OUT ; r2 = 0b11110000
 set 5
 rot r1, OUT
-and OUT, r4          // msb rrt(5) & 0b11111000
-mov r4, OUT         //r4 = ^^
-set 0b11110000
-and OUT, r4
-orr OUT, r2         
-mov r2, OUT         // r2 now holds the final lout
+and OUT, r2 ; OUT = msb rrt(5) & 0b11110000
+orr OUT, r4
+mov r4, OUT ; lout |= msb rrt(5) & 0b11110000
 
-// hout
-mov r4, 0b00000111
+// Restore r2 to lsb
+set 31
+add r0, OUT // OUT = i + 31
+ldr r2, OUT // r2 = mem[i + 31] replaces lsb
+
+str r4, r0 ; mem[i] = lout
+
+// compute hout
 set 5
 rot r1, OUT
-and OUT, r4
-mov r1, OUT         // r1 now holds hout
-
-// Registers we can touch r4, r5, OUT
-mov r4, 0b00000000
-
-//if --> bne r4,r3
-set p0exp_loop
-bne r4, r3
-
-//TODO else if (p0 == p0_exp)
-hammingCheck:
-mov r0, r0
-set 3           
-rot r3, OUT         //Rotating parity comparison by 3
 mov r4, OUT
-set 0b00000001      //Isolating the p0_exp bit
-and r4, OUT     
-mov r4, OUT         //r4 holds p0_exp
-mov r5, 0b00000000
-set else_hamming
+set 0b00000111
+and r4, OUT
+mov r4, OUT ; r4 (hout) = msb rrt(5) & 00000111
+
+set 1
+add r0, OUT
+str r4, OUT ; mem[i+1] = r4 (hout)
+
+mov r4, 33
+set loop_end
+bne r0, r4 ; unconditional branch to end, i never equal 33
+
+else_if_p0_eq_p0_exp:
+mov r0, r0 ; nop
+// HANDLE `else if (p0 == p0_exp)`
+// register state:
+// r1: msb
+// r2: lsb
+// r3: parity XORed with expected parity,  p8_p4_p2_p1_p0_000
+// r4: free
+
+// check if p0 bit is on
+set 0b00001000
+and r3, OUT
+mov r4, OUT
+mov r5, 0 ; safe to use because no and, xor, or orr
+set else
 bne r4, r5
 
+set 1
+mov r4, OUT
+set 1
+rot r4, OUT
+mov r4, OUT ; r4 = 0b10000000
+set 1
+add r0, OUT
+str r4, OUT ; mem[i+1] = 0b1000_0000
+
+mov r4, 1
+mov r5, 0
+set loop_end
+bne r4, r5 ; unconditional branch to end of loop
+
+// END OF ELSE IF STATEMENT
+// START OF first ELSE STATEMENT
+
 //TODO else
-else_hamming:
-mov r4, 0b00000000          //Int hamming = 0;
-
-//First checking if p8 bit is bad
-set 7
-rot r3, OUT
-mov r1, OUT         //r1 now holds the temporary shifted r3 
-set 0b00000001      //OUT now has the mask
-and r1, OUT         //masks the rotation so that its only one bit
-mov r1, OUT 
-mov r2, 0b00000001  //r2 holds the "one" value to represent a mismatch bit
-//Logic : (p8 != p8_exp) hamming += 8
-//if p8 != p8_exp, that means the corresponding bit in r3 will be 1
-//So if the bit in r3 is 1, then you add 8, if its 0, then branch to p4
-//In other words, if r1 doesn't equal r2, then r3 = 0 meaning branch
-set parityfour
-bne r1, r2          //checks if the p8 bit is 
-set 0b00001000
-add r4, OUT
-mov r4, OUT
+else:
+mov r0, r0 ; nop
 
 
-//Checking p4 bit
-parityfour:
-mov r0, r0
-set 6
-rot r3, OUT
-mov r1, OUT
-set 0b00000001
-and r1, OUT
-mov r1, OUT     //r1 holds isolated p4 from r3
-mov r2, 0b00000001  //r2 holds the "one" value to represent a mismatch bit
-set paritytwo
-bne r1, r2
-set 0b00000100
-add r4, OUT
-mov r4, OUT
-
-//Checking p2 bit
-paritytwo:
-mov r0, r0
-set 5
-rot r3, OUT
-mov r1, OUT
-set 0b00000001
-and r1, OUT
-mov r1, OUT
-mov r2, 0b00000001  //r2 holds the "one" value to represent a mismatch bit
-set parityone
-bne r1, r2
-set 0b00000010
-add r4, OUT
-mov r4, OUT
-
-//Checking p1 bit
-parityone:
-mov r0, r0
 set 4
 rot r3, OUT
-mov r1, OUT
-set 0b00000001
-and r1, OUT
-mov r1, OUT
-mov r2, 0b00000001  //r2 holds the "one" value to represent a mismatch bit
-set lsb_out_set
-bne r1, r2
-set 0b00000001
-add r4, OUT
-mov r4, OUT         //r4 now holds hamming total
+mov r4, OUT ; r4 = r3 rot(4)
+set 0b00001111 ; r4 = p0 000 p8 p4 p2 p1
+and r4, OUT ; get rid of p0
+mov r4, OUT ; r4 = hamming
 
-//From here on out we don't need the parity bits until the next cycle
-//They will be recalculated anyways so i'm using it here
-lsb_out_set:
-mov r0, r0
-// r1 for msb, r2 for lsb
+// make sure r1 = msb, r2 = lsb
 ldr r1, r0          // r1 = mem[i] replaces MSB
-mov r2, 1
-add r0, r2          // OUT = i + 1
+set 1
+add r0, OUT          // OUT = i + 1
 ldr r2, OUT         // r2 = mem[OUT] = mem[i+1] replaces LSb
 
-set 0b11111000      //< 8 check
-and OUT, r4         //OUT now has hamming & 0b1111_1000
+set 0b00001000      // < 8 check
+and OUT, r4         // OUT now has hamming & 0b1111_1000
 mov r3, OUT
-mov r5, 0b00000000
+mov r5, 0
 set ge_eight
-bne r5, r3         //checks if r4 == 0 which determines whether it is greater   
+bne r5, r3         // checks if r4 == 0 which determines whether it is greater   
 
-//r1 = msb_out ; r2 = lsb_out
-lt_eight:
-mov r0, r0
-//Case LT Eight
-nand r4, r4         //OUT = flipped bits of hamming
-mov r4, 0b00000001
-add OUT, r4         
-mov r4, OUT         //r4 is now negative
-mov r3, 0b00001000
-add r3, r4          //8 - hamming
-mov r3, OUT         //r3 = ^^
+// Case < 8
+nand r4, r4         // OUT = inverted bits of hamming
+mov r4, OUT
+set 1
+add r4, OUT ; OUT = ~hamming + 1
+mov r4, OUT         // r4 is now negative (2s complement)
+mov r3, 8
+add r3, r4          // 8 - hamming
+mov r3, OUT         // r3 = 8 - hamming
+
 set 0b00000001
 rot OUT, r3         //(1 rrt(8 - hamming))
 mov r4, OUT
 xor r2, r4
-mov r2, OUT
+mov r2, OUT ; r2 = lsb but with bit at position `hamming` flipped
+
 mov r3, 0
 mov r4, 1
 set end_if_else
@@ -378,119 +323,79 @@ bne r3, r4
 
 //Case: GE Eight
 ge_eight:
-mov r0, r0
-mov r3, 0b11110000  //should be -16?
-add r3, r4          //OUT = hamming - 16
-mov r3, OUT         //r3 = ^^
-set 0b00000001
-rot OUT, r3
+mov r0, r0 ; nop
+// r4 is still hamming
+nand r4, r4         // OUT = inverted bits of hamming
 mov r4, OUT
+set 1
+add r4, OUT ; OUT = -hamming
+mov r4, OUT
+set 16
+add r4, OUT
+mov r4, OUT ; r4 = 16 - hamming
+set 1
+rot OUT, r4
+mov r4, OUT ; r4 = 1 >> (16-hamming)
 xor r1, r4
-mov r1, OUT         //r1 now has msb_out
+mov r1, OUT ; msb = msb ^ (1 rrt(16 - hamming));
 
-//r1 = msb_out ; r2 = lsb_out
 end_if_else:
 mov r0, r0
-mov r4, 0b00000000
+
+// goal: put lout into r4
+//r1 = msb; r2 = lsb (bit flipped versions)
+mov r4, 0
 set 3
 rot r2, OUT
-mov r4, OUT         //r4 now holds lsb_out rrt(3)
-set 0b00011111
-and r4, OUT         //r4 = lsb_out rrt(3) & 0b00011111
 mov r4, OUT
-set 0b00000001
-and OUT, r4
-mov r4, OUT         //r4 now holds the first lout expression
-//we don't have to do the orr function for the first one because or'ing with zero is always itself
- 
-//second lout expression
+set 1
+and r4, OUT
+mov r4, OUT ; r4 (lout) = (lsb >> 3) & 1
+
 set 4
 rot r2, OUT
-mov r2, OUT         //we are using r2 now because we no longer need lsb_out for this cycle
-set 0b00001111
-and r2, OUT         //OUT now contains lsb_out rrt(4) & 0b00001111
-mov r2, OUT
-set 0b00001111
-and r2, OUT
-orr OUT, r4         //orring with previous lout 
-mov r4, OUT
+mov r2, OUT ; r2 = (lout >> 4)
+set 0b00001110
+and r2, OUT ; OUT = (lout >> 4) & 0b00001110
+orr OUT, r4
+mov r4, OUT ; lout |= r2
 
-//third lout expression
+// r2 NO LONGER lsb
+
+mov r2, 0b00001111
+set 4
+rot r2, OUT
+mov r2, OUT ; r2 = 0b11110000
 set 5
-rot r1, OUT         //rotating msb_out by 5
-mov r2, OUT         //still storing in r2 because we need r1 eventually for hout
-set 0b11111000
-and r2, OUT
-mov r2, OUT
-set 0b11110000
-and r2, OUT
-orr OUT, r4         
-mov r4, OUT         //r4 now has final lout
+rot r1, OUT
+and OUT, r2 ; OUT = msb rrt(5) & 0b11110000
+orr OUT, r4
+mov r4, OUT ; lout |= msb rrt(5) & 0b11110000
 
-# So quick recap
-# r0 is your counter, do not touch
-# r2 holds garbage data (previously lsb_out), will now hold hout
-# r1 holds msb_out
-# r3 holds garbage data (previously parity bits)
-# r4 holds lout
-# r5 is the tempoarary XOR register
+str r4, r0 ; mem[i] = lout
 
- //Using r1 for hout
- mov r1, 0b00000000
- set 5
- rot r1, OUT
- mov r3, OUT
- set 0b00000111
- and r3, OUT
- mov r1, OUT        //r1 holds hout
+// put hout in r4
+set 5
+rot r1, OUT
+mov r4, OUT
+set 0b00000111
+and r4, OUT
+mov r4, OUT ; hout = msb rot(5) & 0b111
+set 0b01000000
+orr OUT, r4
+mov r4, OUT ; set high 2 bits to 01
 
-
-str r1, r0 ; mem[i] = r1
-set 1
-add r0, OUT ; OUT = i + 1
-str r4, OUT ; mem[i+1] = r4
-
-mov r4, 32
-mov r3, 1
-add r0, r3
-mov r0, OUT
-set loop_start
-bne r0, r4
-
-// set loop_start remember to add the b back in
-// eq r0, r0 ; unconditional branch back up
-
-equalParity:
-mov r0, r0
-str r2, r0
-mov r4, 1
-add r0, r4
-str r1, OUT
-
-//Bne branch back up
-mov r4, 32
-mov r3, 1
-add r0, r3
-mov r0, OUT
-set loop_start
-bne r0, r4
-// set loop_start remember to add the b back in
-// eq r4, r4
-
-p0exp_loop:
-mov r0, r0
-mov r4, 0b10000000
 set 1
 add r0, OUT
 str r4, OUT
 
-//BNE Loop back up
+loop_end:
+mov r0, r0 ; nop
+
+set 2
+add r0, OUT
+mov r0, OUT ; increment i
+
 mov r4, 32
-mov r3, 1
-add r0, r3
-mov r0, OUT
 set loop_start
 bne r0, r4
-// set loop_start remember to add the b back in
-// eq r4, r4 ; unconditional branch back up
-
