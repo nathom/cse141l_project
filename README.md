@@ -7,6 +7,12 @@
 
 A user-friendly assembler that features pseudo ops, debug output, and comment parsing.
 
+### prog[n]\_mach\_code.txt
+
+Contains machine code that can be run if copied to src/mach\_code.txt immediately.
+The branch immediate values have been adjusted so that the current PC LUT
+can run all 3 of them without being modified.
+
 ### /src
 
 Contains all of the SystemVerilog files that make up the microprocessor.
